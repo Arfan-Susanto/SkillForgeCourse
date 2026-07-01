@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+
+{% block title %}SkillForge | Profile{% endblock %}
+
+{% block content %}
+<section class="px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+    <div class="mx-auto max-w-6xl rounded-[2.5rem] border border-white/70 bg-white/85 p-6 shadow-soft dark:border-slate-800/70 dark:bg-slate-950/75 sm:p-8">
+        <div class="mb-8 flex flex-col gap-4 border-b border-slate-100 pb-6 dark:border-slate-800">
+            <div class="flex overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+                <button class="tab-btn flex-1 px-4 py-3 text-sm font-semibold text-slate-900 transition dark:text-slate-200" onclick="openProfileTab('edit-profile')">Edit Profile</button>
+                <button class="tab-btn flex-1 px-4 py-3 text-sm font-semibold text-slate-500 transition dark:text-slate-400" onclick="openProfileTab('ganti-password')">Ganti Password</button>
+            </div>
+        </div>
+
+        <div id="edit-profile" class="profile-tab-content">
+            <div class="grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
+                <aside class="rounded-[2rem] border border-slate-200 bg-slate-50 p-6 text-center dark:border-slate-800 dark:bg-slate-900/70">
+                    <div class="mx-auto flex h-24 w-24 items-center justify-center overflow-hidden rounded-[1.75rem]
+                            bg-black text-white shadow-md
+                            dark:bg-white dark:text-black relative">
+                    {% if profile_user.profile_image %}
+                        <img src="{{ profile_user.profile_image.url }}" alt="Foto profil"
+                            class="absolute inset-0 h-full w-full object-cover">
+                    {% else %}
+                        <span class="relative z-10 text-4xl font-black">
+                            {{ profile_user.username|first|upper }}
+                        </span>
+                    {% endif %}
+                </div>
+                    <h1 class="mt-4 text-2xl font-black tracking-tight text-slate-950 dark:text-white">{{ profile_user.username }}</h1>
+                    <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ profile_user.email|default:'-' }}</p>
+                    <p class="mt-3 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                        {{ profile_user.bio|default:"Belum ada bio." }}
+                    </p>
+
+                    <div class="mt-6 grid grid-cols-2 gap-3 text-left text-xs">
+                        <div class="rounded-2xl bg-white p-4 dark:bg-slate-950">
+                            <p class="text-slate-400">Status</p>
+                            <p class="mt-1 font-semibold text-slate-700 dark:text-slate-200">{% if profile_user.is_instructor %}Instructor{% else %}Student{% endif %}</p>
+                        </div>
+                        <div class="rounded-2xl bg-white p-4 dark:bg-slate-950">
+                            <p class="text-slate-400">Bergabung</p>
+                            <p class="mt-1 font-semibold text-slate-700 dark:text-slate-200">{{ profile_user.date_joined|date:'d M Y' }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-4 text-left dark:border-slate-800 dark:bg-slate-950">
+                        <p class="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Instructor access</p>
+                        {% if profile_user.is_instructor %}
+                            <p class="mt-2 text-sm font-semibold text-emerald-700 dark:text-emerald-300">Akun Anda sudah berstatus instructor.</p>
+                            <a href="{% url 'dashboard:index' %}" class="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">Buka Dashboard</a>
+                        {% elif pending_instructor_application %}
+                            <p class="mt-2 text-sm font-semibold text-amber-700 dark:text-amber-300">Pengajuan Anda masih menunggu review admin.</p>
+                            <p class="mt-2 text-xs leading-6 text-slate-500 dark:text-slate-400">Status terakhir: {{ pending_instructor_application.get_status_display }}</p>
+                            <a href="{% url 'accounts:apply_instructor' %}" class="mt-4 inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm font-bold text-slate-700 transition hover:border-slate-300 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200">Lihat pengajuan</a>
+                        {% elif latest_instructor_application and latest_instructor_application.status == 'rejected' %}
+                            <p class="mt-2 text-sm font-semibold text-rose-700 dark:text-rose-300">Pengajuan terakhir ditolak.</p>
+                            {% if latest_instructor_application.review_note %}
+                                <p class="mt-2 text-xs leading-6 text-slate-500 dark:text-slate-400">Catatan review: {{ latest_instructor_application.review_note }}</p>
+                            {% endif %}
+                            <a href="{% url 'accounts:apply_instructor' %}" class="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">Apply ulang</a>
+                        {% else %}
+                            <p class="mt-2 text-sm font-semibold text-slate-700 dark:text-slate-200">Belum mengajukan instructor access.</p>
+                            <a href="{% url 'accounts:apply_instructor' %}" class="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">Apply Instructor</a>
+                        {% endif %}
+                    </div>
+
+                    <a href="{% url 'accounts:logout' %}" class="mt-6 inline-flex w-full items-center justify-center rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300 dark:hover:bg-rose-500/20">
+                        Logout
+                    </a>
+                </aside>
+
+                <div class="space-y-6">
+                    <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/70">
+                        <div class="mb-5 flex items-center justify-between gap-4">
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">Profile settings</p>
+                                <h2 class="mt-2 text-2xl font-black tracking-tight text-slate-950 dark:text-white">Edit informasi akun</h2>
+                            </div>
+                        </div>
+
+                        <form method="POST" enctype="multipart/form-data" class="space-y-4">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="edit-profile">
+
+                            {% for field in edit_form %}
+                                <div>
+                                    <label class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">{{ field.label }}</label>
+                                    {% if field.field.widget.input_type == 'file' %}
+                                        <input type="file" name="{{ field.name }}" accept="image/jpeg,image/png,image/webp,image/gif" class="w-full rounded-2xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-sm text-slate-700 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200" />
+                                        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Maksimal 1MB. Format: JPG, PNG, WEBP, GIF.</p>
+                                    {% elif field.name == 'bio' %}
+                                        <textarea name="{{ field.name }}" maxlength="100" rows="3" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" placeholder="Ringkasan singkat tentang diri Anda (maks 100 karakter)">{{ field.value|default:'' }}</textarea>
+                                        <p class="mt-2 text-xs text-slate-500 dark:text-slate-400">Maksimal 100 karakter.</p>
+                                    {% else %}
+                                        <input type="{{ field.field.widget.input_type }}" name="{{ field.name }}" value="{{ field.value|default:'' }}" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" />
+                                    {% endif %}
+
+                                    {% if field.errors %}
+                                        <p class="mt-2 text-xs font-medium text-rose-600 dark:text-rose-300">{{ field.errors.0 }}</p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+
+                            <button type="submit"class="inline-flex w-full items-center justify-center rounded-2xl px-6 py-3.5 text-sm font-bold transition hover:-translate-y-0.5 bg-slate-900 text-white hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">Simpan perubahan</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="ganti-password" class="profile-tab-content hidden">
+            <div class="mx-auto max-w-2xl">
+                <div class="rounded-[2rem] border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900/70 sm:p-8">
+                    <div class="mb-5">
+                        <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">Security</p>
+                        <h2 class="mt-2 text-2xl font-black tracking-tight text-slate-950 dark:text-white">Ganti password</h2>
+                        <p class="mt-2 text-sm leading-7 text-slate-500 dark:text-slate-400">Flow ini menggunakan OTP agar proses perubahan password tetap aman.</p>
+                    </div>
+
+                    <div id="change-password-request-panel" class="{% if show_change_password_otp %}hidden{% endif %}">
+                        <form method="POST" class="space-y-5">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="change-password">
+
+                            {% if change_password_form.non_field_errors %}
+                                <div class="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-300">
+                                    {{ change_password_form.non_field_errors.0 }}
+                                </div>
+                            {% endif %}
+
+                            {% for field in change_password_form %}
+                                <div>
+                                    <label class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">{{ field.label }}</label>
+                                    <input type="password" name="{{ field.name }}" class="w-full rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" />
+                                    {% if field.errors %}<p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ field.errors.0 }}</p>{% endif %}
+                                </div>
+                            {% endfor %}
+
+                            <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl px-6 py-3.5 text-sm font-bold text-white transition hover:-translate-y-0.5 bg-slate-900 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">Lanjut kirim OTP</button>
+                        </form>
+                    </div>
+
+                    {% if show_change_password_otp %}
+                    <div id="change-password-otp-panel" class="mt-6">
+                        <div id="change-password-expiry" data-expires-at="{{ profile_change_password_expires_at|default:'' }}" class="hidden"></div>
+                        <div class="mb-5 rounded-2xl border border-slate-300 bg-slate-100 px-4 py-3 text-sm leading-6 text-slate-900 dark:border-slate-700 dark:bg-slate-800/60 dark:text-slate-200">
+                            OTP sudah dikirim ke email Anda. Masukkan kode OTP untuk menyelesaikan perubahan password.
+                        </div>
+
+                        <form method="POST" class="space-y-5">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="verify-change-password-otp">
+
+                            <div>
+                                <label class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">OTP (6 digit)</label>
+                                <input type="text" name="otp" minlength="6" maxlength="6" inputmode="numeric" class="w-full rounded-2xl border border-slate-200 bg-white px-5 py-3.5 text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" />
+                                {% if otp_form.errors.otp %}<p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ otp_form.errors.otp.0 }}</p>{% endif %}
+                                {% if otp_form.non_field_errors %}<p class="mt-2 text-sm text-rose-600 dark:text-rose-300">{{ otp_form.non_field_errors.0 }}</p>{% endif %}
+                            </div>
+
+                            <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl bg-slate-900 px-6 py-3.5 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-slate-800">Verifikasi OTP</button>
+                        </form>
+
+                        <form method="POST" class="mt-3">
+                            {% csrf_token %}
+                            <input type="hidden" name="action" value="resend-change-password-otp">
+                            <button type="submit" class="inline-flex w-full items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200">Kirim ulang OTP</button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const activeTab = "{{ active_tab|default:'edit-profile' }}";
+    openProfileTab(activeTab);
+
+    const otpPanel = document.getElementById('change-password-otp-panel');
+    const requestPanel = document.getElementById('change-password-request-panel');
+    const expiryNode = document.getElementById('change-password-expiry');
+    const expiresAt = expiryNode ? parseFloat(expiryNode.dataset.expiresAt) : NaN;
+
+    if (otpPanel && requestPanel && !Number.isNaN(expiresAt)) {
+        const remainingMs = Math.max(0, (expiresAt * 1000) - Date.now());
+
+        if (remainingMs <= 0) {
+            otpPanel.classList.add('hidden');
+            requestPanel.classList.remove('hidden');
+        } else {
+            window.setTimeout(function() {
+                otpPanel.classList.add('hidden');
+                requestPanel.classList.remove('hidden');
+            }, remainingMs);
+        }
+    }
+});
+
+function openProfileTab(tabName) {
+    document.querySelectorAll('.profile-tab-content').forEach(function(tab) {
+        tab.classList.add('hidden');
+    });
+    document.getElementById(tabName).classList.remove('hidden');
+
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+        btn.classList.remove('text-slate-900', 'border-b-2', 'border-slate-900');
+        btn.classList.add('text-slate-500');
+    });
+
+    document.querySelectorAll('.tab-btn').forEach(function(btn) {
+        if (btn.getAttribute('onclick').includes(tabName)) {
+            btn.classList.add('text-slate-900', 'border-b-2', 'border-slate-900');
+            btn.classList.remove('text-slate-500');
+        }
+    });
+}
+</script>
+{% endblock %}

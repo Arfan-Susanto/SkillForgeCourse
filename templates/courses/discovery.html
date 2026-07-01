@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% load currency %}
+
+{% block title %}SkillForge | Explore courses{% endblock %}
+
+{% block content %}
+<section class="px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+    <div class="mx-auto max-w-7xl">
+        <div class="overflow-hidden rounded-[2.5rem] border border-white/10 bg-black/95 p-6 text-white shadow-glow">
+            <div class="grid gap-8 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
+                <div>
+                    <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-slate-300">
+                        <span class="h-2 w-2 rounded-full bg-emerald-400"></span>
+                        Course discovery
+                    </div>
+                    <h1 class="mt-5 text-4xl font-black tracking-tight sm:text-5xl">Discover the right course for your next skill leap.</h1>
+                    <p class="mt-4 max-w-2xl text-sm leading-7 text-slate-300/80 sm:text-base">Cari materi yang relevan, tampilkan katalog yang bersih, dan pilih course dengan rasa yang premium seperti Linear atau Stripe.</p>
+                </div>
+
+                <div class="rounded-[2rem] border border-white/10 bg-white/5 p-4 shadow-soft backdrop-blur">
+                    <form method="get" class="flex flex-col gap-3 sm:flex-row">
+                        <div class="relative flex-1">
+
+                            <input type="text" name="q" value="{{ query }}" placeholder="Search courses or topics" class="border-0 bg-white/95 py-3 pl-11 pr-4 text-slate-900 shadow-none focus:ring-0" />
+                        </div>
+                        <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-white px-5 py-3 text-sm font-bold text-slate-950 transition hover:-translate-y-0.5 hover:bg-slate-100">
+                            Search
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-8 flex items-center justify-between gap-4">
+            <div>
+                <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Browse</p>
+                <h2 class="mt-2 text-2xl font-black tracking-tight text-slate-950 dark:text-white">{{ courses|length }} course{% if courses|length != 1 %}s{% endif %} available</h2>
+            </div>
+            {% if query %}
+                <a href="{% url 'courses:discovery' %}" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">Clear search</a>
+            {% endif %}
+        </div>
+
+        <div class="mt-6 grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+            {% for course in courses %}
+                <article class="group overflow-hidden rounded-[2rem] border border-white/70 bg-white/85 shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-glow dark:border-slate-800/70 dark:bg-slate-950/80">
+                    <a href="{% url 'courses:course_detail' course.pk %}" class="block">
+                        {% if course.thumbnail %}
+                            <img src="{{ course.thumbnail.url }}" alt="{{ course.title }}" class="h-56 w-full object-cover transition duration-500 group-hover:scale-[1.04]">
+                        {% else %}
+                            <div class="flex h-56 items-center justify-center bg-gradient-to-br from-slate-100 via-white to-cyan-50 text-slate-700 dark:from-slate-900 dark:via-slate-950 dark:to-slate-900 dark:text-slate-300">
+                                <div class="text-center">
+                                    <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-white shadow-sm dark:bg-slate-800">
+                                        <i class="fa-solid fa-layer-group"></i>
+                                    </div>
+                                    <p class="mt-3 text-sm font-semibold">No thumbnail</p>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </a>
+
+                    <div class="space-y-5 p-6">
+                        <div class="flex items-start justify-between gap-4">
+                            <div>
+                                <h3 class="line-clamp-1 text-xl font-extrabold tracking-tight text-slate-950 dark:text-white">{{ course.title }}</h3>
+                                <p class="mt-2 line-clamp-2 text-sm leading-7 text-slate-600 dark:text-slate-300">{{ course.description }}</p>
+                            </div>
+                            {% if course.price %}
+                                <span class="shrink-0 rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-900 dark:bg-slate-800/70 dark:text-slate-300">{{ course.price|rupiah }}</span>
+                            {% else %}
+                                <span class="shrink-0 rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-200">Gratis</span>
+                            {% endif %}
+                        </div>
+
+                        <div class="flex items-center justify-between border-t border-slate-100 pt-4 text-xs text-slate-500 dark:border-slate-800 dark:text-slate-400">
+                            {% with instructor=course.instructor %}
+                                <div class="flex items-center gap-3">
+                                    {% if instructor %}
+                                        {% if instructor.profile_image %}
+                                            <img
+                                                src="{{ instructor.profile_image.url }}"
+                                                alt="{{ instructor.get_full_name|default:instructor.username }}"
+                                                class="h-8 w-8 rounded-full object-cover"
+                                            >
+                                        {% else %}
+                                            <div class="grid h-8 w-8 place-items-center rounded-full bg-slate-200 text-[10px] font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                                                {{ instructor.get_full_name|default:instructor.username|slice:":1"|upper }}
+                                            </div>
+                                        {% endif %}
+                                    {% else %}
+                                        <div class="grid h-8 w-8 place-items-center rounded-full bg-slate-200 text-[10px] font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
+                                            ?
+                                        </div>
+                                    {% endif %}
+
+                                    <div>
+                                        <p class="font-medium text-slate-700 dark:text-slate-300">
+                                            {% if instructor %}
+                                                {{ instructor.get_full_name|default:instructor.username }}
+                                            {% else %}
+                                                Unknown instructor
+                                            {% endif %}
+                                        </p>
+                                        <p>{{ course.enrolled_students_count }} students</p>
+                                    </div>
+                                </div>
+                            {% endwith %}
+
+                        <a href="{% url 'courses:course_detail' course.pk %}"
+                        class="font-semibold text-slate-900 transition hover:text-slate-700 dark:text-slate-300 dark:hover:text-white">
+                            View details
+                        </a>
+                    </div>
+                </article>
+            {% empty %}
+                <div class="col-span-full rounded-[2rem] border border-dashed border-slate-300 bg-white/80 p-12 text-center shadow-soft dark:border-slate-700 dark:bg-slate-950/70">
+                    <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-slate-100 text-slate-900 dark:bg-slate-800/70 dark:text-slate-300">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <h3 class="mt-4 text-xl font-extrabold tracking-tight text-slate-950 dark:text-white">No courses found</h3>
+                    <p class="mt-2 text-sm leading-7 text-slate-500 dark:text-slate-400">Coba kata kunci lain atau hapus filter pencarian untuk melihat katalog lengkap.</p>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,466 @@
+{% extends "dashboard/layout.html" %}
+
+{% load currency %}
+
+{% block title %}Manage Transactions - SkillForge Admin{% endblock %}
+
+{% block breadcrumb %}Transactions{% endblock %}
+
+{% block extra_head %}
+<style>
+    @media print {
+        /* Hide everything by default except the invoice modal */
+        body * {
+            visibility: hidden;
+        }
+
+        #invoiceModal,
+        #invoiceModal * {
+            visibility: visible;
+        }
+
+        /* Position the modal at the absolute top-left for print */
+        #invoiceModal {
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            height: auto !important;
+            background: white !important;
+            color: black !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            backdrop-filter: none !important;
+            display: block !important;
+            overflow: visible !important;
+        }
+
+        #invoiceModal>div {
+            border: none !important;
+            box-shadow: none !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+        }
+
+        /* Hide actions and modal close button */
+        #invoiceModal button,
+        #invoiceModal .border-t.border-slate-100 {
+            display: none !important;
+            visibility: hidden !important;
+        }
+
+        /* Hide navigation */
+        aside,
+        header {
+            display: none !important;
+            visibility: hidden !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="w-full">
+    <!-- Header Card -->
+    <div class="mb-6 w-full flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white/95 p-6 shadow-soft backdrop-blur lg:flex-row lg:items-center lg:justify-between dark:border-slate-800 dark:bg-slate-950/95">
+        <div>
+            <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-500">
+                Transaction Panel
+            </p>
+            <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
+                Manage Transactions
+            </h1>
+            <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400">
+                Kelola invoice hasil transaksi para user secara terpusat dengan filter pencarian dan detail cetak.
+            </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-2.5 text-xs font-bold text-slate-700 dark:border-slate-800 dark:bg-slate-900/50 dark:text-slate-350">
+                Total: {{ page_obj.paginator.count }} Invoice
+            </div>
+
+            <a class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+            href="{% url 'dashboard:index' %}">
+                Kembali
+            </a>
+        </div>
+    </div>
+
+    <!-- Filter & Search Controls -->
+    <div class="mb-6 rounded-3xl border border-slate-200 bg-white p-5 shadow-soft dark:border-slate-800 dark:bg-slate-900/60">
+        <form method="get" class="flex flex-col gap-4 sm:flex-row sm:items-center">
+            <!-- Search Query -->
+            <div class="relative flex-1">
+                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <input 
+                    type="text" 
+                    name="q" 
+                    value="{{ query }}" 
+                    placeholder="Cari nomor invoice, user, atau nama course..." 
+                    class="w-full rounded-2xl border border-slate-200 py-3 pl-11 pr-4 text-sm bg-slate-50/50 text-slate-900 placeholder-slate-400 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                >
+            </div>
+
+            <!-- Status Filter -->
+            <div class="w-full sm:w-48">
+                <select 
+                    name="status" 
+                    class="w-full rounded-2xl border border-slate-200 py-3 px-4 text-sm bg-slate-50/50 text-slate-900 focus:border-brand-500 focus:outline-none focus:ring-1 focus:ring-brand-500 dark:border-slate-700 dark:bg-slate-900 dark:text-white"
+                >
+                    <option value="">Semua Status</option>
+                    <option value="paid" {% if status_filter == 'paid' %}selected{% endif %}>Paid</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="failed" {% if status_filter == 'failed' %}selected{% endif %}>Failed</option>
+                </select>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="flex gap-2">
+                <button type="submit" class="inline-flex items-center justify-center gap-2 rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-black dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200">
+                    Filter
+                </button>
+                {% if query or status_filter %}
+                <a href="?" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-350 dark:hover:bg-slate-800">
+                    Reset
+                </a>
+                {% endif %}
+            </div>
+        </form>
+    </div>
+
+    <!-- Invoices List Table -->
+    <div class="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-soft dark:border-slate-800 dark:bg-slate-950">
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-slate-200 text-left dark:divide-slate-800">
+                <thead class="bg-slate-50 dark:bg-slate-900/50">
+                    <tr>
+                        <th class="px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Invoice Number</th>
+                        <th class="px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">User / Buyer</th>
+                        <th class="px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Courses</th>
+                        <th class="px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Amount Paid</th>
+                        <th class="px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Method</th>
+                        <th class="px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Status</th>
+                        <th class="px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Date</th>
+                        <th class="px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-900 dark:bg-slate-950">
+                    {% for invoice in page_obj %}
+                    <tr class="transition hover:bg-slate-50/70 dark:hover:bg-slate-900/20">
+                        <!-- Invoice Number -->
+                        <td class="px-6 py-5 whitespace-nowrap">
+                            <span class="font-mono text-sm font-bold text-slate-900 dark:text-white">
+                                {{ invoice.invoice_number }}
+                            </span>
+                        </td>
+                        <!-- User / Buyer -->
+                        <td class="px-6 py-5">
+                            <div class="font-semibold text-slate-900 dark:text-white">{{ invoice.user.username }}</div>
+                            <div class="text-xs text-slate-500 dark:text-slate-400">{{ invoice.user.email|default:"No email" }}</div>
+                        </td>
+                        <!-- Courses -->
+                        <td class="px-6 py-5">
+                            <ul class="space-y-1">
+                                {% for course in invoice.courses.all %}
+                                <li class="text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    <i class="fa-solid fa-graduation-cap mr-1 text-slate-400 dark:text-slate-500"></i>{{ course.title }}
+                                </li>
+                                {% endfor %}
+                            </ul>
+                        </td>
+                        <!-- Amount Paid -->
+                        <td class="px-6 py-5 whitespace-nowrap">
+                            <span class="font-bold text-slate-900 dark:text-white">
+                                {% if invoice.amount_paid > 0 %}
+                                {{ invoice.amount_paid|rupiah }}
+                                {% else %}
+                                Gratis
+                                {% endif %}
+                            </span>
+                        </td>
+                        <!-- Payment Method -->
+                        <td class="px-6 py-5 whitespace-nowrap">
+                            <span class="text-sm text-slate-600 dark:text-slate-350">
+                                {{ invoice.payment_method }}
+                            </span>
+                        </td>
+                        <!-- Status Badge -->
+                        <td class="px-6 py-5 whitespace-nowrap">
+                            {% if invoice.status|lower == 'paid' %}
+                            <span class="rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-bold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
+                                Paid
+                            </span>
+                            {% elif invoice.status|lower == 'pending' %}
+                            <span class="rounded-full bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-700 dark:bg-amber-500/10 dark:text-amber-300">
+                                Pending
+                            </span>
+                            {% else %}
+                            <span class="rounded-full bg-rose-50 px-2.5 py-0.5 text-xs font-bold text-rose-700 dark:bg-rose-500/10 dark:text-rose-300">
+                                {{ invoice.status }}
+                            </span>
+                            {% endif %}
+                        </td>
+                        <!-- Date -->
+                        <td class="px-6 py-5 whitespace-nowrap text-sm text-slate-600 dark:text-slate-400">
+                            {{ invoice.created_at|date:'Y-m-d H:i' }}
+                        </td>
+                        <!-- Action -->
+                        <td class="px-6 py-5 whitespace-nowrap text-right">
+                            <button 
+                                type="button" 
+                                onclick="openInvoiceModalFromButton(this)"
+                                data-invoice-number="{{ invoice.invoice_number|escapejs }}"
+                                data-created-at="{{ invoice.created_at|date:'Y-m-d H:i'|escapejs }}"
+                                data-payment-method="{{ invoice.payment_method|escapejs }}"
+                                data-amount-paid="{{ invoice.amount_paid }}"
+                                data-status="{{ invoice.status|escapejs }}"
+                                data-username="{{ invoice.user.username|escapejs }}"
+                                data-email="{{ invoice.user.email|default:'No email'|escapejs }}"
+                                data-courses-id="invoice-courses-{{ forloop.counter0 }}"
+                                class="inline-flex h-9 items-center justify-center rounded-xl bg-slate-900 px-4 text-xs font-semibold text-white transition duration-200 hover:-translate-y-0.5 hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"
+                            >
+                                Details
+                            </button>
+                            <script type="application/json" id="invoice-courses-{{ forloop.counter0 }}">[
+                                {% for c in invoice.courses.all %}
+                                {"title": "{{ c.title|escapejs }}", "price": "{{ c.price }}"}{% if not forloop.last %},{% endif %}
+                                {% endfor %}
+                            ]</script>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="px-6 py-16 text-center">
+                            <div class="mx-auto max-w-sm">
+                                <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-slate-100 text-slate-750 dark:bg-slate-900 dark:text-slate-450">
+                                    <i class="fa-solid fa-receipt text-lg"></i>
+                                </div>
+                                <h2 class="mt-4 text-lg font-bold text-slate-900 dark:text-white">Tidak ada transaksi ditemukan</h2>
+                                <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-450">
+                                    Coba ubah kriteria pencarian atau filter status untuk menemukan invoice.
+                                </p>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Pagination Block -->
+        {% if page_obj.has_other_pages %}
+        <div class="flex items-center justify-between border-t border-slate-200 px-6 py-5 dark:border-slate-800">
+            <div class="text-sm text-slate-500 dark:text-slate-450">
+                Menampilkan <span class="font-semibold text-slate-900 dark:text-white">{{ page_obj.start_index }}</span> 
+                sampai <span class="font-semibold text-slate-900 dark:text-white">{{ page_obj.end_index }}</span> 
+                dari <span class="font-semibold text-slate-900 dark:text-white">{{ page_obj.paginator.count }}</span> transaksi
+            </div>
+            <div class="flex items-center gap-2">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
+                   class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">
+                    Previous
+                </a>
+                {% else %}
+                <span class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50/50 px-4 text-xs font-semibold text-slate-400 dark:border-slate-800/40 dark:bg-slate-900/30 dark:text-slate-600">
+                    Previous
+                </span>
+                {% endif %}
+
+                <div class="hidden sm:flex items-center gap-1">
+                    {% for num in page_obj.paginator.page_range %}
+                    {% if page_obj.number == num %}
+                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-slate-950 text-xs font-bold text-white dark:bg-white dark:text-slate-950">
+                        {{ num }}
+                    </span>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                    <a href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
+                       class="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-350 dark:hover:bg-slate-850">
+                        {{ num }}
+                    </a>
+                    {% endif %}
+                    {% endfor %}
+                </div>
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}"
+                   class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">
+                    Next
+                </a>
+                {% else %}
+                <span class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50/50 px-4 text-xs font-semibold text-slate-400 dark:border-slate-800/40 dark:bg-slate-900/30 dark:text-slate-600">
+                    Next
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Invoice Modal -->
+<div id="invoiceModal" class="fixed inset-0 z-[100] hidden items-start justify-center overflow-y-auto bg-slate-950/60 p-4 pt-20 pb-20 sm:pt-28 sm:pb-28 backdrop-blur-sm dark:bg-slate-950/80" role="dialog" aria-modal="true">
+    <div class="relative w-full max-w-2xl overflow-hidden rounded-[2.5rem] border border-white/60 bg-white shadow-2xl transition-all duration-300 dark:border-slate-800 dark:bg-slate-950">
+        <!-- Header -->
+        <div class="flex items-center justify-between border-b border-slate-100 bg-slate-50/50 px-6 py-5 dark:border-slate-900 dark:bg-slate-900/50">
+            <div>
+                <h3 class="text-lg font-black text-slate-950 dark:text-white">Invoice Details</h3>
+                <p id="modalInvoiceNumber" class="font-mono text-xs text-slate-500 dark:text-slate-400 mt-0.5">INV-xxxxxx</p>
+            </div>
+            <button onclick="closeInvoiceModal()" type="button" class="grid h-9 w-9 place-items-center rounded-full bg-slate-100 text-slate-500 transition hover:bg-slate-200 dark:bg-slate-900 dark:text-slate-400 dark:hover:bg-slate-800">
+                <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+        </div>
+
+        <!-- Body -->
+        <div class="p-6 space-y-6">
+            <!-- Metadata Grid -->
+            <div class="grid grid-cols-2 gap-4 rounded-2xl bg-slate-50 p-4 text-xs dark:bg-slate-900/40">
+                <div>
+                    <span class="block text-slate-400 dark:text-slate-500">Date</span>
+                    <span id="modalDate" class="font-semibold text-slate-700 dark:text-slate-300">-</span>
+                </div>
+
+                <div>
+                    <span class="block text-slate-400 dark:text-slate-500">Payment Method</span>
+                    <span id="modalMethod" class="font-semibold text-slate-700 dark:text-slate-300">-</span>
+                </div>
+
+                <div>
+                    <span class="block text-slate-400 dark:text-slate-500">Billing To</span>
+                    <span id="modalBillingUser" class="font-semibold text-slate-700 dark:text-slate-300">-</span>
+                </div>
+
+                <div>
+                    <span class="block text-slate-400 dark:text-slate-500">Status</span>
+                    <span id="modalStatus" class="mt-0.5 inline-block rounded-full bg-emerald-50 px-2.5 py-0.5 font-bold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">
+                        -
+                    </span>
+                </div>
+            </div>
+
+            <!-- Items -->
+            <div>
+                <h4 class="text-xs font-bold uppercase tracking-[0.1em] text-slate-400 dark:text-slate-500 mb-2">Items Purchased</h4>
+                <div class="divide-y divide-slate-100 rounded-2xl border border-slate-150 px-4 dark:divide-slate-900 dark:border-slate-850">
+                    <div id="modalItemsList" class="divide-y divide-slate-100 dark:divide-slate-900">
+                        <!-- Dynamic items -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total -->
+            <div class="flex items-center justify-between border-t border-slate-100 pt-4 dark:border-slate-900">
+                <span class="text-sm font-bold text-slate-900 dark:text-white">Total Amount</span>
+                <span id="modalTotal" class="text-xl font-black text-slate-950 dark:text-white">Rp 0</span>
+            </div>
+        </div>
+
+        <!-- Footer Actions -->
+        <div class="flex items-center justify-end gap-3 border-t border-slate-100 px-6 py-5 dark:border-slate-900 bg-slate-50/50 dark:bg-slate-900/50">
+            <button onclick="window.print()" type="button" class="inline-flex h-10 items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 text-xs font-bold text-slate-700 shadow-sm transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:text-slate-350 dark:hover:bg-slate-900">
+                <i class="fa-solid fa-print"></i> Print Invoice
+            </button>
+            <button onclick="closeInvoiceModal()" type="button" class="inline-flex h-10 items-center justify-center rounded-2xl bg-slate-900 px-5 text-xs font-bold text-white transition hover:bg-slate-800">
+                Close
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    function openInvoiceModalFromButton(button) {
+        const coursesElement = document.getElementById(button.dataset.coursesId);
+        const courses = coursesElement ? JSON.parse(coursesElement.textContent) : [];
+
+        openInvoiceModal(
+            button.dataset.invoiceNumber,
+            button.dataset.createdAt,
+            button.dataset.paymentMethod,
+            button.dataset.amountPaid,
+            button.dataset.status,
+            button.dataset.username,
+            button.dataset.email,
+            courses
+        );
+    }
+
+    function formatRupiah(value) {
+        const numericValue = Number.parseFloat(value);
+
+        if (!Number.isFinite(numericValue) || numericValue <= 0) {
+            return 'Gratis';
+        }
+
+        return new Intl.NumberFormat('id-ID', {
+            style: 'currency',
+            currency: 'IDR',
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0,
+        }).format(numericValue).replace('Rp', 'Rp ');
+    }
+
+    function openInvoiceModal(number, date, method, total, status, username, email, courses) {
+        document.getElementById('modalInvoiceNumber').textContent = number;
+        document.getElementById('modalDate').textContent = date;
+        document.getElementById('modalMethod').textContent = method;
+        document.getElementById('modalBillingUser').textContent = username + ' (' + email + ')';
+        
+        // Status Badge Style
+        const statusSpan = document.getElementById('modalStatus');
+        statusSpan.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+        statusSpan.className = 'mt-0.5 inline-block rounded-full px-2.5 py-0.5 font-bold ';
+        if (status.toLowerCase() === 'paid') {
+            statusSpan.className += 'bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300';
+        } else if (status.toLowerCase() === 'pending') {
+            statusSpan.className += 'bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-300';
+        } else {
+            statusSpan.className += 'bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-300';
+        }
+
+        document.getElementById('modalTotal').textContent = formatRupiah(total);
+
+        const listContainer = document.getElementById('modalItemsList');
+        listContainer.innerHTML = '';
+
+        courses.forEach(function (item) {
+            const row = document.createElement('div');
+            row.className = 'flex items-center justify-between py-3.5 text-sm';
+
+            const titleSpan = document.createElement('span');
+            titleSpan.className = 'font-semibold text-slate-700 dark:text-slate-350';
+            titleSpan.textContent = item.title;
+
+            const priceSpan = document.createElement('span');
+            priceSpan.className = 'font-mono text-slate-950 dark:text-white font-bold';
+            priceSpan.textContent = formatRupiah(item.price);
+
+            row.appendChild(titleSpan);
+            row.appendChild(priceSpan);
+            listContainer.appendChild(row);
+        });
+
+        const modal = document.getElementById('invoiceModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+    }
+
+    function closeInvoiceModal() {
+        const modal = document.getElementById('invoiceModal');
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+    }
+
+    // Close on click outside
+    document.getElementById('invoiceModal').addEventListener('click', function (e) {
+        if (e.target === this) {
+            closeInvoiceModal();
+        }
+    });
+</script>
+{% endblock %}

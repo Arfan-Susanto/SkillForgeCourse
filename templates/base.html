@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#020617">
+    <title>{% block title %}SkillForge{% endblock %}</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" referrerpolicy="no-referrer">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                fontFamily: {
+                    sans: ['"Plus Jakarta Sans"', 'ui-sans-serif', 'system-ui']
+                },
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eef2ff',
+                            100: '#e0e7ff',
+                            200: '#c7d2fe',
+                            300: '#a5b4fc',
+                            400: '#818cf8',
+                            500: '#6366f1',
+                            600: '#4f46e5',
+                            700: '#4338ca',
+                            800: '#3730a3',
+                            900: '#312e81'
+                        },
+                        ink: '#0f172a',
+                        mist: '#f8fafc'
+                    },
+                    boxShadow: {
+                        glow: '0 24px 80px -28px rgba(79, 70, 229, 0.5)',
+                        soft: '0 18px 50px -30px rgba(15, 23, 42, 0.28)',
+                        glass: '0 12px 40px -22px rgba(15, 23, 42, 0.35)'
+                    },
+                    backgroundImage: {
+                        grid: 'linear-gradient(rgba(99,102,241,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.08) 1px, transparent 1px)'
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background:
+                radial-gradient(circle at top left, rgba(99, 102, 241, 0.18), transparent 26%),
+                radial-gradient(circle at top right, rgba(34, 211, 238, 0.10), transparent 24%),
+                linear-gradient(180deg, #f8fafc 0%, #eef2ff 42%, #ffffff 100%);
+            color: #0f172a;
+        }
+
+        .dark body {
+            background:
+                radial-gradient(circle at top left, rgba(99, 102, 241, 0.22), transparent 28%),
+                radial-gradient(circle at top right, rgba(34, 211, 238, 0.12), transparent 24%),
+                linear-gradient(180deg, #020617 0%, #0f172a 58%, #111827 100%);
+            color: #e2e8f0;
+        }
+
+        ::selection {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        input:not([type='checkbox']):not([type='radio']),
+        select,
+        textarea {
+            width: 100%;
+            border-radius: 1rem;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            background: rgba(255, 255, 255, 0.9);
+            padding: 0.9rem 1rem;
+            font-size: 0.95rem;
+            color: #0f172a;
+            outline: none;
+            transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease, background-color 180ms ease;
+            box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+        }
+
+        input:not([type='checkbox']):not([type='radio']):focus,
+        select:focus,
+        textarea:focus {
+            border-color: rgba(99, 102, 241, 0.9);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.15);
+        }
+
+        .dark input:not([type='checkbox']):not([type='radio']),
+        .dark select,
+        .dark textarea {
+            border-color: rgba(71, 85, 105, 0.8);
+            background: rgba(15, 23, 42, 0.8);
+            color: #e2e8f0;
+        }
+
+        .dark input::placeholder,
+        .dark textarea::placeholder {
+            color: rgba(148, 163, 184, 0.95);
+        }
+
+        input[type='file'] {
+            padding: 0.8rem 1rem;
+        }
+
+        button,
+        a {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        [data-page-enter] {
+            animation: page-enter 520ms ease both;
+        }
+
+        [data-toast-enter] {
+            animation: toast-enter 240ms ease both;
+        }
+
+        [data-toast-leave] {
+            animation: toast-leave 180ms ease both;
+        }
+
+        @keyframes page-enter {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes toast-enter {
+            from {
+                opacity: 0;
+                transform: translateX(18px) translateY(-10px) scale(0.98);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0) translateY(0) scale(1);
+            }
+        }
+
+        @keyframes toast-leave {
+            from {
+                opacity: 1;
+                transform: translateX(0) scale(1);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(12px) scale(0.96);
+            }
+        }
+    </style>
+    {% block extra_head %}{% endblock %}
+</head>
+<body class="min-h-screen font-sans antialiased text-slate-900 transition-colors duration-300 dark:text-slate-100">
+    <div class="pointer-events-none fixed inset-0 -z-10 bg-grid bg-[length:48px_48px] opacity-[0.03] dark:opacity-[0.05]"></div>
+    <div class="pointer-events-none fixed inset-x-0 top-0 -z-10 h-[34rem] bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.2),transparent_55%)] dark:bg-[radial-gradient(circle_at_top,rgba(99,102,241,0.18),transparent_55%)]"></div>
+
+    <header class="sticky top-0 z-50 border-b border-white/60 bg-white/75 backdrop-blur-2xl dark:border-slate-800/80 dark:bg-slate-950/65">
+        <div class="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+            <a href="{% url 'home' %}" class="group flex items-center gap-3 transition-transform duration-200 hover:-translate-y-0.5">
+                <span class="grid h-11 w-11 place-items-center rounded-2xl bg-slate-900 text-base font-black text-white shadow-lg dark:bg-white dark:text-slate-900">S</span>
+                <span class="leading-tight">
+                    <span class="block text-lg font-extrabold tracking-tight text-slate-900 dark:text-white">SkillForge</span>
+                    <span class="block text-xs font-medium text-slate-500 dark:text-slate-400">Premium learning platform</span>
+                </span>
+            </a>
+
+            <nav class="hidden items-center gap-1 lg:flex">
+                <a href="{% url 'home' %}" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/70 dark:hover:text-white">Home</a>
+                <a href="{% url 'courses:discovery' %}" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/70 dark:hover:text-white">Explore</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'courses:my_courses' %}" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/70 dark:hover:text-white">My Courses</a>
+                    <a href="{% url 'courses:history' %}" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/70 dark:hover:text-white">History</a>
+                    <a href="{% url 'courses:cart' %}" class="relative rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/70 dark:hover:text-white">
+                        Cart
+                        <span class="ml-2 inline-flex min-w-5 items-center justify-center rounded-full bg-slate-700 px-1.5 text-[10px] font-bold text-white">{{ cart_count|default:0 }}</span>
+                    </a>
+                    {% if user.is_staff or user.is_instructor %}
+                        <a href="{% url 'dashboard:index' %}" class="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800/70 dark:hover:text-white">Dashboard</a>
+                    {% endif %}
+                {% endif %}
+            </nav>
+
+            <div class="flex items-center gap-2">
+                <button id="themeToggle" type="button" class="group relative inline-flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                    <svg id="themeToggleMoonIcon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="h-4 w-4 transition-all duration-300 group-hover:scale-110 dark:hidden">
+                        <path d="M21.75 15.09a9.25 9.25 0 0 1-11.84-12.4.75.75 0 0 0-.95-.95A10.5 10.5 0 1 0 22.7 16.04a.75.75 0 0 0-.95-.95Z" />
+                    </svg>
+                    <svg id="themeToggleSunIcon" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" class="hidden h-4 w-4 transition-all duration-300 group-hover:scale-110 dark:block">
+                        <path d="M12 17.25a5.25 5.25 0 1 1 0-10.5 5.25 5.25 0 0 1 0 10.5Zm0 2.25a.75.75 0 0 1 .75.75V22a.75.75 0 0 1-1.5 0v-1.75a.75.75 0 0 1 .75-.75Zm0-17.5a.75.75 0 0 1 .75.75V4.5a.75.75 0 0 1-1.5 0V2.75A.75.75 0 0 1 12 2Zm8 9.25a.75.75 0 0 1 .75.75H22a.75.75 0 0 1 0 1.5h-1.25a.75.75 0 0 1-.75-.75Zm-17.25 0A.75.75 0 0 1 3.5 12H2.75a.75.75 0 0 1 0-1.5H4a.75.75 0 0 1 .75.75Zm14.14-6.39a.75.75 0 0 1 1.06 0l.88.88a.75.75 0 1 1-1.06 1.06l-.88-.88a.75.75 0 0 1 0-1.06Zm-12.02 0a.75.75 0 0 1 0 1.06l-.88.88A.75.75 0 0 1 3.97 7.75l.88-.88a.75.75 0 0 1 1.06 0Zm12.02 12.02a.75.75 0 0 1 0 1.06l-.88.88a.75.75 0 0 1-1.06-1.06l.88-.88a.75.75 0 0 1 1.06 0Zm-12.02 0a.75.75 0 0 1 1.06 0l.88.88A.75.75 0 1 1 4.85 21l-.88-.88a.75.75 0 0 1 0-1.06Z" />
+                    </svg>
+                </button>
+
+                {% if user.is_authenticated %}
+                    <a href="{% url 'accounts:profile' %}" aria-label="Profile" class="inline-flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200 bg-white/85 p-0.5 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 dark:border-slate-700 dark:bg-slate-900/85 sm:h-11 sm:w-11">
+                        <span class="grid h-full w-full place-items-center overflow-hidden rounded-full bg-slate-900 text-white dark:bg-white dark:text-slate-900">
+                            {% if user.profile_image %}
+                                <img src="{{ user.profile_image.url }}" alt="Avatar" class="h-full w-full object-cover">
+                            {% else %}
+                                {{ user.username|first|upper }}
+                            {% endif %}
+                        </span>
+                    </a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="hidden rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 sm:inline-flex">Sign in</a>
+                {% endif %}
+
+            </div>
+        </div>
+
+        <div id="mobileNavPanel" class="hidden border-t border-slate-200 bg-white/95 px-4 py-4 shadow-xl dark:border-slate-800 dark:bg-slate-950/95 lg:hidden">
+            <div class="mx-auto flex max-w-7xl flex-col gap-2">
+                <a href="{% url 'home' %}" class="rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80">Home</a>
+                <a href="{% url 'courses:discovery' %}" class="rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80">Explore</a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'courses:my_courses' %}" class="rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80">My Courses</a>
+                    <a href="{% url 'courses:history' %}" class="rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80">History</a>
+                    <a href="{% url 'courses:cart' %}" class="rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80">Cart ({{ cart_count|default:0 }})</a>
+                    {% if user.is_staff or user.is_instructor %}
+                        <a href="{% url 'dashboard:index' %}" class="rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80">Dashboard</a>
+                    {% endif %}
+                    <a href="{% url 'accounts:profile' %}" class="rounded-2xl px-4 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-800/80">Profile</a>
+                {% else %}
+                    <a href="{% url 'accounts:login' %}" class="rounded-2xl px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800/70">Sign in</a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    <main class="flex-1">
+        {% if messages %}
+            <div class="pointer-events-none fixed right-4 top-4 z-[100] flex w-[calc(100vw-2rem)] max-w-sm flex-col gap-3 sm:right-6 sm:top-6" data-page-enter>
+                {% for message in messages %}
+                    <div
+                        class="pointer-events-auto relative overflow-hidden rounded-2xl border px-4 py-4 pr-12 text-sm shadow-glass backdrop-blur-xl data-[toast-type=success]:border-emerald-200 data-[toast-type=success]:bg-emerald-50/95 data-[toast-type=success]:text-emerald-900 data-[toast-type=error]:border-rose-200 data-[toast-type=error]:bg-rose-50/95 data-[toast-type=error]:text-rose-900 data-[toast-type=warning]:border-amber-200 data-[toast-type=warning]:bg-amber-50/95 data-[toast-type=warning]:text-amber-900 data-[toast-type=info]:border-brand-200 data-[toast-type=info]:bg-brand-50/95 data-[toast-type=info]:text-brand-900"
+                        data-toast-enter
+                        data-toast-type="{{ message.tags|default:'info' }}"
+                        role="status"
+                        aria-live="polite"
+                    >
+                        <div class="flex items-start gap-3">
+                            <div class="mt-0.5 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white/80 text-xs font-black shadow-sm data-[toast-type=success]:text-emerald-600 data-[toast-type=error]:text-rose-600 data-[toast-type=warning]:text-amber-600 data-[toast-type=info]:text-brand-600">
+                                !
+                            </div>
+                            <p class="leading-6">{{ message }}</p>
+                        </div>
+                        <button type="button" class="absolute right-3 top-3 grid h-7 w-7 place-items-center rounded-full bg-black/5 text-xs font-bold transition hover:bg-black/10" data-toast-close aria-label="Dismiss notification">
+                            ×
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div data-page-enter>
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+
+    {% block modals %}{% endblock %}
+
+    {% block extra_scripts %}{% endblock %}
+    {% if user.is_authenticated %}
+        <button
+            id="supportChatToggle"
+            type="button"
+            aria-label="Customer Service AI"
+            aria-controls="supportChatPanel"
+            aria-expanded="false"
+            class="fixed bottom-[5.75rem] right-4 z-50 inline-flex items-center gap-2 rounded-full bg-black border border-slate-700 text-white px-4 py-3 text-sm font-bold text-white shadow-glow transition hover:-translate-y-0.5 hover:brightness-110 lg:bottom-6 lg:right-6"
+        >
+            <span class="grid h-8 w-8 place-items-center rounded-full bg-white/15">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4" aria-hidden="true">
+                    <path d="M12 3a7 7 0 0 0-7 7v3.5A2.5 2.5 0 0 0 7.5 16H8v2a1 1 0 0 0 1.6.8L12 16h3a7 7 0 0 0 0-14h-3Z" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <path d="M9.5 9.5h.01M12 9.5h.01M14.5 9.5h.01" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+            </span>
+            <span class="hidden sm:inline">Customer Service AI</span>
+        </button>
+
+        <section
+            id="supportChatPanel"
+            class="fixed bottom-[10.5rem] right-4 z-50 hidden w-[calc(100vw-2rem)] max-w-sm overflow-hidden rounded-3xl border border-slate-200/80 bg-white/95 shadow-2xl backdrop-blur-xl dark:border-slate-700/80 dark:bg-slate-900/95 lg:bottom-24 lg:right-6"
+            aria-label="Customer Service Chat"
+        >
+            <div class="flex items-center justify-between border-b border-slate-200/80 bg-black px-4 py-3 text-white dark:border-slate-700/80">
+                <div>
+                    <p class="text-sm font-extrabold">Customer Service AI</p>
+                    <p class="text-[11px] text-white/85">Tanya apa saja seputar SkillForge</p>
+                </div>
+                <button id="supportChatClose" type="button" class="grid h-8 w-8 place-items-center rounded-full bg-white/20 text-sm font-bold transition hover:bg-white/30" aria-label="Tutup chat">
+                    ×
+                </button>
+            </div>
+
+            <div id="supportChatMessages" class="max-h-[22rem] min-h-[18rem] space-y-3 overflow-y-auto bg-slate-50/70 px-4 py-4 text-sm dark:bg-slate-950/30">
+                <article class="max-w-[90%] rounded-2xl rounded-bl-md bg-white px-3 py-2 text-slate-700 shadow-sm dark:bg-slate-800 dark:text-slate-100">
+                    Halo, saya CS AI SkillForge. Silakan tanya tentang kursus, pembayaran, atau kebijakan platform.
+                </article>
+            </div>
+
+            <form id="supportChatForm" class="border-t border-slate-200/80 bg-white p-3 dark:border-slate-700/80 dark:bg-slate-900">
+                <label for="supportChatInput" class="sr-only">Pesan</label>
+                <div class="flex items-end gap-2">
+                    <textarea
+                        id="supportChatInput"
+                        name="message"
+                        rows="2"
+                        maxlength="2000"
+                        placeholder="Contoh: bagaimana aturan refund?"
+                        class="max-h-28 min-h-[3rem] resize-y"
+                        required
+                    ></textarea>
+                    <button
+                    id="supportChatSend"
+                    type="submit"
+                    class="inline-flex h-12 shrink-0 items-center justify-center rounded-2xl bg-black border border-slate-700 px-4 text-xs font-bold text-white transition hover:bg-slate-900 disabled:cursor-not-allowed disabled:bg-slate-700">
+                        Kirim
+                    </button>
+                </div>
+                <p id="supportChatHint" class="mt-2 text-[11px] text-slate-500 dark:text-slate-400">Jawaban diambil dari knowledge base Customer Service.</p>
+            </form>
+        </section>
+    {% else %}
+        <a
+            href="{% url 'accounts:login' %}?next={{ request.get_full_path|urlencode }}"
+            class="fixed bottom-[5.75rem] right-4 z-50 inline-flex items-center gap-2 rounded-full bg-black border border-slate-700 text-white px-4 py-3 text-sm font-bold text-white shadow-glow transition hover:-translate-y-0.5 hover:brightness-110 lg:bottom-6 lg:right-6"
+            aria-label="Login untuk chat Customer Service AI"
+        >
+            <span class="grid h-8 w-8 place-items-center rounded-full bg-white/15">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4" aria-hidden="true">
+                    <path d="M12 3a7 7 0 0 0-7 7v3.5A2.5 2.5 0 0 0 7.5 16H8v2a1 1 0 0 0 1.6.8L12 16h3a7 7 0 0 0 0-14h-3Z" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <path d="M9.5 9.5h.01M12 9.5h.01M14.5 9.5h.01" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+            </span>
+            <span class="hidden sm:inline">Login untuk Chat</span>
+        </a>
+    {% endif %}
+
+    <!-- Mobile bottom navbar (flush to bottom) -->
+    <!-- spacer to avoid content overlap on small screens -->
+    <div class="lg:hidden" style="height:calc(56px + env(safe-area-inset-bottom));"></div>
+    <nav aria-label="Mobile navigation" class="fixed inset-x-0 bottom-0 z-50 lg:hidden">
+        <div class="w-full bg-white/95 backdrop-blur border-t border-white/10 px-4 py-2 flex items-center justify-between dark:bg-slate-950 dark:text-white dark:border-slate-800" style="padding-bottom:env(safe-area-inset-bottom);">
+            <a href="{% url 'home' %}" class="group flex flex-col items-center gap-1 px-2 py-1 text-sm text-slate-700 dark:text-white/90 hover:text-slate-900">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <path d="M3 11.5L12 4l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V11.5z" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+                <span class="text-[11px]">Home</span>
+            </a>
+
+            <a href="{% url 'courses:discovery' %}" class="group flex flex-col items-center gap-1 px-2 py-1 text-sm text-slate-700 dark:text-white/90 hover:text-slate-900">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <path d="M21 15v4a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-4" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <polyline points="7 10 12 5 17 10" stroke-linecap="round" stroke-linejoin="round"></polyline>
+                    <path d="M12 5v14" stroke-linecap="round" stroke-linejoin="round"></path>
+                </svg>
+                <span class="text-[11px]">Explore</span>
+            </a>
+
+            <a href="{% url 'courses:my_courses' %}" class="group flex flex-col items-center gap-1 px-2 py-1 text-sm text-slate-700 dark:text-white/90 hover:text-slate-900">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <circle cx="12" cy="7" r="4" stroke-linecap="round" stroke-linejoin="round"></circle>
+                </svg>
+                <span class="text-[11px]">My Courses</span>
+            </a>
+
+            {% if user.is_authenticated %}
+            <a href="{% url 'courses:history' %}" class="group flex flex-col items-center gap-1 px-2 py-1 text-sm text-slate-700 dark:text-white/90 hover:text-slate-900">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <path d="M12 8v4l3 3" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <circle cx="12" cy="12" r="9" stroke-linecap="round" stroke-linejoin="round"></circle>
+                </svg>
+                <span class="text-[11px]">History</span>
+            </a>
+            {% endif %}
+
+            <a href="{% url 'courses:cart' %}" class="group flex flex-col items-center gap-1 px-2 py-1 text-sm text-slate-700 dark:text-white/90 hover:text-slate-900">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                    <path d="M6 6h15l-1.5 9h-13L4 3H2" stroke-linecap="round" stroke-linejoin="round"></path>
+                    <circle cx="9" cy="20" r="1"></circle>
+                    <circle cx="19" cy="20" r="1"></circle>
+                </svg>
+                <span class="text-[11px]">Cart</span>
+            </a>
+
+            {% if not user.is_authenticated %}
+                <a href="{% url 'accounts:login' %}" class="group flex flex-col items-center gap-1 px-2 py-1 text-sm text-slate-700 dark:text-white/90 hover:text-slate-900">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+                        <path d="M15 3h4a2 2 0 0 1 2 2v4" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M10 14L21 3" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <path d="M21 3l-7 17-4-7-7 4" stroke-linecap="round" stroke-linejoin="round"></path>
+                    </svg>
+                    <span class="text-[11px]">Sign in</span>
+                </a>
+            {% endif %}
+        </div>
+    </nav>
+    <script>
+        (function () {
+            const isAuthenticated = "{{ user.is_authenticated|yesno:'true,false' }}" === "true";
+            const root = document.documentElement;
+            const storedTheme = localStorage.getItem('skillforge-theme');
+            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+            const initialTheme = storedTheme || (prefersDark ? 'dark' : 'light');
+
+            if (initialTheme === 'dark') {
+                root.classList.add('dark');
+            } else {
+                root.classList.remove('dark');
+            }
+
+            if (!isAuthenticated) {
+                const supportChatToggle = document.getElementById('supportChatToggle');
+                const supportChatPanel = document.getElementById('supportChatPanel');
+
+                if (supportChatToggle) {
+                    supportChatToggle.remove();
+                }
+
+                if (supportChatPanel) {
+                    supportChatPanel.remove();
+                }
+            }
+
+            const themeToggle = document.getElementById('themeToggle');
+            const supportChatToggle = document.getElementById('supportChatToggle');
+            const supportChatPanel = document.getElementById('supportChatPanel');
+            const supportChatClose = document.getElementById('supportChatClose');
+            const supportChatForm = document.getElementById('supportChatForm');
+            const supportChatInput = document.getElementById('supportChatInput');
+            const supportChatMessages = document.getElementById('supportChatMessages');
+            const supportChatSend = document.getElementById('supportChatSend');
+            const supportChatHint = document.getElementById('supportChatHint');
+            const mobileNavToggle = document.getElementById('mobileNavToggle');
+            const mobileNavPanel = document.getElementById('mobileNavPanel');
+            const supportChatHistoryKey = 'skillforge-support-chat-history';
+            const supportChatHistoryLimit = 20;
+            const navigationEntries = window.performance && typeof window.performance.getEntriesByType === 'function'
+                ? window.performance.getEntriesByType('navigation')
+                : [];
+            const isReloadNavigation = navigationEntries.length > 0 && navigationEntries[0].type === 'reload';
+
+            if (isReloadNavigation) {
+                localStorage.removeItem(supportChatHistoryKey);
+            }
+
+            const syncThemeIcon = () => {
+                const isDark = root.classList.contains('dark');
+                if (themeToggle) {
+                    themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+                }
+            };
+
+            syncThemeIcon();
+
+            if (themeToggle) {
+                themeToggle.addEventListener('click', function () {
+                    const isDark = root.classList.toggle('dark');
+                    localStorage.setItem('skillforge-theme', isDark ? 'dark' : 'light');
+                    syncThemeIcon();
+                });
+            }
+
+            if (mobileNavToggle && mobileNavPanel) {
+                mobileNavToggle.addEventListener('click', function () {
+                    mobileNavPanel.classList.toggle('hidden');
+                });
+
+                mobileNavPanel.querySelectorAll('a').forEach(function (link) {
+                    link.addEventListener('click', function () {
+                        mobileNavPanel.classList.add('hidden');
+                    });
+                });
+            }
+
+            const profileButton = document.getElementById('profileMenuButton');
+            const profileDropdown = document.getElementById('profileMenuDropdown');
+            const profileArrow = document.getElementById('profileMenuArrow');
+
+            if (profileButton && profileDropdown && profileArrow) {
+                const setOpenState = (isOpen) => {
+                    profileButton.setAttribute('aria-expanded', String(isOpen));
+                    profileDropdown.classList.toggle('visible', isOpen);
+                    profileDropdown.classList.toggle('opacity-100', isOpen);
+                    profileDropdown.classList.toggle('scale-100', isOpen);
+                    profileDropdown.classList.toggle('opacity-0', !isOpen);
+                    profileDropdown.classList.toggle('scale-95', !isOpen);
+                    profileDropdown.classList.toggle('invisible', !isOpen);
+                    profileArrow.classList.toggle('rotate-180', isOpen);
+                };
+
+                const isOpen = () => profileButton.getAttribute('aria-expanded') === 'true';
+
+                profileButton.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                    setOpenState(!isOpen());
+                });
+
+                profileDropdown.addEventListener('click', function (event) {
+                    event.stopPropagation();
+                });
+
+                document.addEventListener('click', function () {
+                    if (isOpen()) {
+                        setOpenState(false);
+                    }
+                });
+
+                document.addEventListener('keydown', function (event) {
+                    if (event.key === 'Escape') {
+                        setOpenState(false);
+                    }
+                });
+            }
+
+            document.querySelectorAll('[data-toast-enter]').forEach(function (toast) {
+                const closeButton = toast.querySelector('[data-toast-close]');
+                let closeTimer = window.setTimeout(function () {
+                    toast.setAttribute('data-toast-leave', '');
+                    window.setTimeout(function () {
+                        toast.remove();
+                    }, 180);
+                }, 4500);
+
+                const dismissToast = function () {
+                    window.clearTimeout(closeTimer);
+                    if (toast.hasAttribute('data-toast-leave')) {
+                        return;
+                    }
+                    toast.setAttribute('data-toast-leave', '');
+                    window.setTimeout(function () {
+                        toast.remove();
+                    }, 180);
+                };
+
+                if (closeButton) {
+                    closeButton.addEventListener('click', dismissToast);
+                }
+            });
+
+            const appendMessage = function (text, role) {
+                if (!supportChatMessages) {
+                    return;
+                }
+
+                const message = document.createElement('article');
+                message.className = role === 'user'
+                ? 'ml-auto max-w-[90%] rounded-2xl rounded-br-md bg-slate-950 border border-slate-700 px-3 py-2 text-white shadow-sm'
+                : 'max-w-[90%] rounded-2xl rounded-bl-md bg-slate-900 border border-slate-700 px-3 py-2 text-slate-100 shadow-sm';
+                message.textContent = text;
+                supportChatMessages.appendChild(message);
+                supportChatMessages.scrollTop = supportChatMessages.scrollHeight;
+            };
+
+            const stripHtml = function (text) {
+                if (!text) {
+                    return '';
+                }
+
+                const wrapper = document.createElement('div');
+                wrapper.innerHTML = text;
+                return (wrapper.textContent || wrapper.innerText || '').replace(/\s+/g, ' ').trim();
+            };
+
+            const getStoredSupportChatHistory = function () {
+                try {
+                    const rawHistory = localStorage.getItem(supportChatHistoryKey);
+                    if (!rawHistory) {
+                        return [];
+                    }
+
+                    const parsedHistory = JSON.parse(rawHistory);
+                    if (!Array.isArray(parsedHistory)) {
+                        localStorage.removeItem(supportChatHistoryKey);
+                        return [];
+                    }
+
+                    const filtered = parsedHistory.filter(function (item) {
+                        return item && typeof item === 'object'
+                            && (item.role === 'user' || item.role === 'assistant')
+                            && typeof item.content === 'string'
+                            && item.content.trim();
+                    }).slice(-supportChatHistoryLimit);
+
+                    if (filtered.length === 0 && parsedHistory.length > 0) {
+                        localStorage.removeItem(supportChatHistoryKey);
+                    }
+
+                    return filtered;
+                } catch (error) {
+                    localStorage.removeItem(supportChatHistoryKey);
+                    return [];
+                }
+            };
+
+            const saveStoredSupportChatHistory = function (history) {
+                try {
+                    if (!Array.isArray(history)) {
+                        localStorage.removeItem(supportChatHistoryKey);
+                        return;
+                    }
+
+                    const validHistory = history.filter(function (item) {
+                        return item && typeof item === 'object'
+                            && typeof item.role === 'string'
+                            && typeof item.content === 'string'
+                            && item.content.trim();
+                    }).slice(-supportChatHistoryLimit);
+
+                    const jsonStr = JSON.stringify(validHistory);
+                    if (!jsonStr || jsonStr.length === 0) {
+                        localStorage.removeItem(supportChatHistoryKey);
+                        return;
+                    }
+
+                    localStorage.setItem(supportChatHistoryKey, jsonStr);
+                } catch (error) {
+                    localStorage.removeItem(supportChatHistoryKey);
+                }
+            };
+
+            const renderStoredSupportChatHistory = function () {
+                if (!supportChatMessages) {
+                    return;
+                }
+
+                const history = getStoredSupportChatHistory();
+                history.forEach(function (item) {
+                    appendMessage(item.content, item.role);
+                });
+            };
+
+            renderStoredSupportChatHistory();
+
+            const setChatOpen = function (isOpen) {
+                if (!supportChatPanel || !supportChatToggle) {
+                    return;
+                }
+                supportChatPanel.classList.toggle('hidden', !isOpen);
+                supportChatToggle.setAttribute('aria-expanded', String(isOpen));
+                if (isOpen && supportChatInput) {
+                    supportChatInput.focus();
+                }
+            };
+
+            const getCookieValue = function (cookieName) {
+                const cookies = document.cookie ? document.cookie.split(';') : [];
+                for (let i = 0; i < cookies.length; i += 1) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.startsWith(cookieName + '=')) {
+                        return decodeURIComponent(cookie.slice(cookieName.length + 1));
+                    }
+                }
+                return '';
+            };
+
+            if (supportChatToggle && supportChatPanel) {
+                supportChatToggle.addEventListener('click', function () {
+                    const currentlyHidden = supportChatPanel.classList.contains('hidden');
+                    setChatOpen(currentlyHidden);
+                });
+            }
+
+            if (supportChatClose) {
+                supportChatClose.addEventListener('click', function () {
+                    setChatOpen(false);
+                });
+            }
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    setChatOpen(false);
+                }
+            });
+
+            if (supportChatForm && supportChatInput && supportChatSend && supportChatHint) {
+                supportChatForm.addEventListener('submit', async function (event) {
+                    event.preventDefault();
+
+                    const message = supportChatInput.value.trim();
+                    if (!message) {
+                        return;
+                    }
+
+                    const history = getStoredSupportChatHistory();
+                    appendMessage(message, 'user');
+                    supportChatInput.value = '';
+                    supportChatSend.disabled = true;
+                    supportChatHint.textContent = 'Sedang memproses jawaban...';
+
+                    try {
+                        const csrfToken = getCookieValue('csrftoken');
+                        const response = await fetch('/api/support/chat/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': csrfToken
+                            },
+                            body: JSON.stringify({
+                                message: message,
+                                history: history
+                            })
+                        });
+                        const responseText = await response.text();
+                        let data = null;
+
+                        try {
+                            data = responseText ? JSON.parse(responseText) : null;
+                        } catch (parseError) {
+                            data = null;
+                        }
+
+                        if (!response.ok) {
+                            const detail = data && typeof data.detail === 'string'
+                                ? stripHtml(data.detail)
+                                : '';
+                            const fallback = response.status === 502
+                                ? 'Layanan AI sedang bermasalah. Coba lagi beberapa menit lagi.'
+                                : 'Maaf, terjadi kendala saat menghubungi CS AI.';
+                            appendMessage(detail || fallback, 'bot');
+                        } else {
+                            const answer = stripHtml(responseText.trim() || (data && data.answer) || 'Maaf, saya belum punya jawaban untuk pertanyaan ini.');
+                            appendMessage(answer || 'Maaf, saya belum punya jawaban untuk pertanyaan ini.', 'bot');
+                            
+                            const validAnswer = (answer || '').trim();
+                            if (validAnswer && message) {
+                                saveStoredSupportChatHistory(history.concat([
+                                    { role: 'user', content: message },
+                                    { role: 'assistant', content: validAnswer }
+                                ]));
+                            }
+                        }
+                    } catch (error) {
+                        appendMessage('Koneksi ke server bermasalah. Coba ulang beberapa saat lagi.', 'bot');
+                    } finally {
+                        supportChatSend.disabled = false;
+                        supportChatHint.textContent = 'Jawaban diambil dari knowledge base Customer Service.';
+                        supportChatInput.focus();
+                    }
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

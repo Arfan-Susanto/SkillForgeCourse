@@ -1,0 +1,103 @@
+{% extends "dashboard/layout.html" %}
+
+{% block title %}SkillForge Admin | Instructor Requests{% endblock %}
+{% block breadcrumb %}Instructor Requests{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <section class="rounded-[2.5rem] border border-white/70 bg-white/85 p-6 shadow-soft dark:border-slate-800/70 dark:bg-slate-950/75">
+        <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">Instructor review</p>
+                <h1 class="mt-2 text-3xl font-black tracking-tight text-slate-950 dark:text-white">Review apply instructor requests</h1>
+                <p class="mt-3 text-sm leading-7 text-slate-500 dark:text-slate-400">
+                    Approve request untuk mengubah role user menjadi instructor, atau reject dengan catatan review.
+                </p>
+            </div>
+
+            <div class="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
+                Pending: {{ pending_count }}
+            </div>
+        </div>
+    </section>
+
+    <section class="space-y-4">
+        {% for application in page_obj %}
+            <article class="rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-soft dark:border-slate-800/70 dark:bg-slate-950/75">
+                <div class="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+                    <div>
+                        <div class="flex flex-wrap items-center gap-3">
+                            <h2 class="text-2xl font-black tracking-tight text-slate-950 dark:text-white">{{ application.full_name }}</h2>
+                            <span class="rounded-full px-3 py-1 text-xs font-bold uppercase tracking-[0.2em] {% if application.status == 'pending' %}bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-200{% elif application.status == 'approved' %}bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-200{% else %}bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-200{% endif %}">
+                                {{ application.get_status_display }}
+                            </span>
+                        </div>
+                        <p class="mt-2 text-sm text-slate-500 dark:text-slate-400">{{ application.user.username }} · {{ application.user.email|default:'-' }}</p>
+                        <p class="mt-4 text-sm font-semibold text-slate-900 dark:text-slate-100">{{ application.headline }}</p>
+                        <p class="mt-2 max-w-3xl text-sm leading-7 text-slate-600 dark:text-slate-300">{{ application.bio }}</p>
+                        <div class="mt-4 flex flex-wrap gap-3 text-xs text-slate-500 dark:text-slate-400">
+                            <span class="rounded-full bg-slate-100 px-3 py-1 dark:bg-slate-800/70">Experience: {{ application.experience_years }} years</span>
+                            {% if application.portfolio_url %}
+                                <a href="{{ application.portfolio_url }}" target="_blank" rel="noreferrer" class="rounded-full bg-slate-100 px-3 py-1 hover:text-slate-900 dark:bg-slate-800/70 dark:hover:text-white">Portfolio</a>
+                            {% endif %}
+                        </div>
+                        <div class="mt-4 rounded-2xl border border-slate-100 bg-slate-50 p-4 text-sm leading-7 text-slate-600 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300">
+                            <p class="font-semibold text-slate-900 dark:text-white">Motivation</p>
+                            <p class="mt-2">{{ application.motivation }}</p>
+                        </div>
+                    </div>
+
+                    <div class="w-full max-w-md rounded-[1.5rem] border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/70">
+                        <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">Review action</p>
+                        {% if application.status == 'pending' %}
+                            <form method="post" class="mt-4 space-y-3">
+                                {% csrf_token %}
+                                <input type="hidden" name="application_id" value="{{ application.id }}">
+                                <textarea name="review_note" rows="3" class="w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-900 shadow-sm outline-none transition focus:border-brand-500 focus:ring-4 focus:ring-brand-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100" placeholder="Catatan opsional untuk approval atau rejection"></textarea>
+                                <div class="grid gap-3 sm:grid-cols-2">
+                                    <button type="submit" name="action" value="approve" class="inline-flex items-center justify-center rounded-2xl bg-emerald-600 px-4 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-emerald-500">Approve</button>
+                                    <button type="submit" name="action" value="reject" class="inline-flex items-center justify-center rounded-2xl bg-rose-600 px-4 py-3 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-rose-500">Reject</button>
+                                </div>
+                            </form>
+                        {% else %}
+                            <div class="mt-4 rounded-2xl border border-slate-200 bg-white p-4 text-sm leading-6 text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">
+                                <p class="font-semibold text-slate-900 dark:text-white">Reviewed by</p>
+                                <p class="mt-1">{{ application.reviewed_by|default:'-' }}</p>
+                                <p class="mt-3 font-semibold text-slate-900 dark:text-white">Review note</p>
+                                <p class="mt-1">{{ application.review_note|default:'-' }}</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </article>
+        {% empty %}
+            <div class="rounded-[2rem] border border-dashed border-slate-300 bg-white/80 p-10 text-center text-sm text-slate-500 dark:border-slate-700 dark:bg-slate-950/60 dark:text-slate-400">
+                Belum ada instructor request.
+            </div>
+        {% endfor %}
+
+        {% if page_obj.has_other_pages %}
+            <div class="mt-6 flex flex-col gap-3 rounded-[2rem] border border-slate-100 bg-slate-50 p-4 text-sm text-slate-600 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300 sm:flex-row sm:items-center sm:justify-between">
+                <p>
+                    Menampilkan <span class="font-semibold text-slate-900 dark:text-white">{{ page_obj.start_index }}</span>
+                    sampai <span class="font-semibold text-slate-900 dark:text-white">{{ page_obj.end_index }}</span>
+                    dari <span class="font-semibold text-slate-900 dark:text-white">{{ page_obj.paginator.count }}</span> request
+                </p>
+                <div class="flex items-center gap-2">
+                    {% if page_obj.has_previous %}
+                        <a href="?page={{ page_obj.previous_page_number }}" class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">Previous</a>
+                    {% else %}
+                        <span class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50/50 px-4 text-xs font-semibold text-slate-400 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-600">Previous</span>
+                    {% endif %}
+                    <span class="inline-flex h-9 items-center justify-center rounded-xl bg-slate-950 px-4 text-xs font-bold text-white dark:bg-white dark:text-slate-950">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                    {% if page_obj.has_next %}
+                        <a href="?page={{ page_obj.next_page_number }}" class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-300">Next</a>
+                    {% else %}
+                        <span class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50/50 px-4 text-xs font-semibold text-slate-400 dark:border-slate-700 dark:bg-slate-950/40 dark:text-slate-600">Next</span>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}SkillForge | Apply Instructor{% endblock %}
+
+{% block content %}
+<section class="px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+    <div class="mx-auto grid max-w-6xl overflow-hidden rounded-[2.5rem] border border-white/70 bg-white/85 shadow-soft backdrop-blur-xl lg:grid-cols-[0.9fr_1.1fr] dark:border-slate-800/70 dark:bg-slate-950/70">
+        <aside class="flex flex-col justify-between bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-8 text-white sm:p-10">
+            <div>
+                <span class="inline-flex rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
+                    Apply Instructor
+                </span>
+                <h1 class="mt-5 text-4xl font-black tracking-tight">Upgrade akun Anda menjadi instructor.</h1>
+                <p class="mt-4 max-w-md text-sm leading-7 text-slate-300">
+                    Kirim profil singkat, pengalaman mengajar, dan motivasi Anda. Admin akan meninjau request ini sebelum akses dashboard diberikan.
+                </p>
+            </div>
+
+            <div class="mt-8 rounded-[1.75rem] border border-white/10 bg-white/10 p-5 backdrop-blur">
+                <p class="text-xs uppercase tracking-[0.25em] text-slate-300">Alur</p>
+                <ol class="mt-4 space-y-3 text-sm leading-6 text-slate-200">
+                    <li>User submit request</li>
+                    <li>Request status pending</li>
+                    <li>Admin review approve/reject</li>
+                    <li>Role berubah jadi instructor</li>
+                    <li>Akses instructor dashboard terbuka</li>
+                </ol>
+            </div>
+        </aside>
+
+        <section class="p-6 sm:p-8 lg:p-10">
+            <div class="mb-8">
+                <span class="inline-flex rounded-full bg-slate-100 px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-slate-700 dark:bg-slate-800/70 dark:text-slate-300">
+                    Instructor Request
+                </span>
+                <h2 class="mt-4 text-3xl font-black tracking-tight text-slate-950 dark:text-white">Lengkapi pengajuan Anda</h2>
+                <p class="mt-3 text-sm leading-7 text-slate-500 dark:text-slate-400">
+                    Isi data berikut agar admin bisa menilai apakah akun Anda siap di-upgrade menjadi instructor.
+                </p>
+            </div>
+
+            {% if pending_instructor_application %}
+                <div class="mb-6 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+                    Request Anda sedang <strong>pending</strong>. Silakan tunggu review admin.
+                </div>
+            {% endif %}
+
+            {% if latest_instructor_application and latest_instructor_application.status == 'rejected' %}
+                <div class="mb-6 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm leading-6 text-rose-800 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200">
+                    Pengajuan terakhir ditolak. Anda bisa kirim ulang request dengan perbaikan.
+                    {% if latest_instructor_application.review_note %}
+                        <div class="mt-2 text-xs leading-6 text-rose-700/90 dark:text-rose-200/90">Catatan review: {{ latest_instructor_application.review_note }}</div>
+                    {% endif %}
+                </div>
+            {% endif %}
+
+            {% if not pending_instructor_application %}
+                <form method="post" class="space-y-5">
+                    {% csrf_token %}
+                    {{ form.non_field_errors }}
+
+                    {% for field in form %}
+                        <div>
+                            <label class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                            {{ field }}
+                            {% if field.help_text %}
+                                <p class="mt-2 text-xs leading-6 text-slate-400">{{ field.help_text|safe }}</p>
+                            {% endif %}
+                            {% if field.errors %}
+                                <p class="mt-2 text-xs font-medium text-rose-600 dark:text-rose-300">{{ field.errors|striptags }}</p>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <button class="inline-flex w-full items-center justify-center rounded-2xl bg-slate-900 px-4 py-3.5 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+                        Submit Request
+                    </button>
+                </form>
+            {% endif %}
+        </section>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,117 @@
+{% extends "dashboard/layout.html" %}
+
+{% load currency %}
+
+{% block breadcrumb %}Manage Courses{% endblock %}
+
+{% block content %}
+  <div class="w-full">
+    <div class="sticky top-0 z-10 mb-6 flex flex-col gap-4 rounded-3xl border border-white/70 bg-white/85 p-6 shadow-soft backdrop-blur lg:flex-row lg:items-center lg:justify-between dark:border-slate-800/70 dark:bg-slate-950/75">
+      <div>
+        <p class="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Course Management</p>
+        <h1 class="mt-2 text-3xl font-extrabold tracking-tight text-slate-950 dark:text-white">Manage Courses</h1>
+        <p class="mt-2 max-w-2xl text-sm leading-6 text-slate-600 dark:text-slate-400">Kelola kursus dari dashboard admin dengan tampilan yang lebih bersih, rapi, dan mudah dipindai.</p>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        {% if user.is_instructor %}
+        <a class="inline-flex items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100 dark:border-emerald-500/20 dark:bg-emerald-500/10 dark:text-emerald-200 dark:hover:bg-emerald-500/20" href="{% url 'courses:withdraw_request' %}">
+          Request WD
+        </a>
+        <div class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
+          Balance: {{ balance|rupiah_money }}
+        </div>
+        {% endif %}
+        <a class="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800" href="{% url 'dashboard:index' %}">Kembali ke Dashboard</a>
+        <a class="inline-flex items-center justify-center gap-2 rounded-xl bg-slate-950 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-black dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200"href="{% url 'dashboard:manage_course_add' %}">
+          <i class="fa-solid fa-plus text-xs"></i>
+          Tambah Course
+      </a>
+      </div>
+    </div>
+
+    <div class="overflow-hidden rounded-3xl border border-white/70 bg-white/85 shadow-soft dark:border-slate-800/70 dark:bg-slate-950/75">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-200 text-left dark:divide-slate-800">
+          <thead class="bg-slate-50 dark:bg-slate-900/50">
+            <tr>
+              <th class="px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Title</th>
+              <th class="px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Price</th>
+              <th class="px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Instructor</th>
+              <th class="px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Created</th>
+              <th class="px-6 py-4 text-xs font-semibold uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 bg-white dark:divide-slate-900 dark:bg-slate-950">
+            {% for course in page_obj %}
+            <tr class="transition hover:bg-slate-50/70 dark:hover:bg-slate-900/20">
+              <td class="px-6 py-5">
+                <div class="font-semibold text-slate-900 dark:text-white">{{ course.title }}</div>
+                <div class="mt-1 text-sm text-slate-500 line-clamp-1 dark:text-slate-400">{{ course.description|truncatechars:90 }}</div>
+              </td>
+              <td class="px-6 py-5 text-sm text-slate-700 dark:text-slate-300">
+                {% if course.price %}
+                  {{ course.price|rupiah }}
+                {% else %}
+                  Gratis
+                {% endif %}
+              </td>
+              <td class="px-6 py-5 text-sm text-slate-700 dark:text-slate-300">{{ course.instructor }}</td>
+              <td class="px-6 py-5 text-sm text-slate-600 dark:text-slate-400">{{ course.created_at }}</td>
+              <td class="px-6 py-5">
+                <div class="flex flex-wrap gap-2">
+                  <a class="inline-flex items-center justify-center rounded-xl border border-slate-200 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-white dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800" href="{% url 'dashboard:manage_course_edit' course.pk %}">Edit</a>
+                  <a class="inline-flex items-center justify-center rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 transition hover:bg-rose-100 dark:border-rose-500/20 dark:bg-rose-500/10 dark:text-rose-300 dark:hover:bg-rose-500/20" href="{% url 'dashboard:manage_course_delete' course.pk %}">Delete</a>
+                </div>
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="5" class="px-6 py-16 text-center">
+                <div class="mx-auto max-w-sm">
+                  <div class="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                    <i class="fa-solid fa-folder-open"></i>
+                  </div>
+                  <h2 class="mt-4 text-lg font-bold text-slate-900 dark:text-white">Belum ada course</h2>
+                  <p class="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">Tambahkan course pertama untuk mulai mengisi dashboard ini.</p>
+                  <a class="mt-5 inline-flex items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-soft transition hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200" href="{% url 'dashboard:manage_course_add' %}">
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    Tambah Course
+                  </a>
+                </div>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% if page_obj.has_other_pages %}
+        <div class="flex flex-col gap-3 border-t border-slate-100 px-6 py-5 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
+          <p class="text-sm text-slate-500 dark:text-slate-400">
+            Menampilkan <span class="font-semibold text-slate-900 dark:text-white">{{ page_obj.start_index }}</span>
+            sampai <span class="font-semibold text-slate-900 dark:text-white">{{ page_obj.end_index }}</span>
+            dari <span class="font-semibold text-slate-900 dark:text-white">{{ page_obj.paginator.count }}</span> course
+          </p>
+
+          <div class="flex items-center gap-2">
+            {% if page_obj.has_previous %}
+              <a href="?page={{ page_obj.previous_page_number }}" class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">Previous</a>
+            {% else %}
+              <span class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50/50 px-4 text-xs font-semibold text-slate-400 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-600">Previous</span>
+            {% endif %}
+
+            <span class="inline-flex h-9 items-center justify-center rounded-xl bg-slate-950 px-4 text-xs font-bold text-white dark:bg-white dark:text-slate-950">
+              {{ page_obj.number }} / {{ page_obj.paginator.num_pages }}
+            </span>
+
+            {% if page_obj.has_next %}
+              <a href="?page={{ page_obj.next_page_number }}" class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">Next</a>
+            {% else %}
+              <span class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50/50 px-4 text-xs font-semibold text-slate-400 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-600">Next</span>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

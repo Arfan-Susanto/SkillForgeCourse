@@ -1,0 +1,643 @@
+{% extends 'base.html' %}
+
+{% block title %}SkillForge | Modern learning platform{% endblock %}
+
+{% block extra_head %}
+<style>
+    @keyframes commenter-marquee-right {
+        from {
+            transform: translateX(-50%);
+        }
+
+        to {
+            transform: translateX(0);
+        }
+    }
+
+    .commenter-marquee-track {
+        animation: commenter-marquee-right 24s linear infinite;
+        will-change: transform;
+    }
+
+    .commenter-marquee-track:hover {
+        animation-play-state: paused;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="relative overflow-hidden px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
+    <div class="mx-auto max-w-7xl">
+        <div class="grid items-center gap-10 rounded-[2.5rem] border border-white/60 bg-white/75 p-6 shadow-soft backdrop-blur-xl lg:grid-cols-[1.15fr_0.85fr] lg:p-10 dark:border-slate-800/70 dark:bg-slate-950/60">
+            <div class="space-y-8">
+                <div class="inline-flex items-center gap-2 rounded-full border border-slate-300 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-white">
+                    <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                    Premium Course learning
+                </div>
+
+                <div class="space-y-5">
+                    <h1 class="max-w-3xl text-4xl font-black tracking-tight text-slate-950 sm:text-5xl lg:text-6xl dark:text-white">
+                        Build skills faster with a clean, focused learning workspace.
+                    </h1>
+                    <p class="max-w-2xl text-lg leading-8 text-slate-600 dark:text-slate-300">
+                        SkillForge menghadirkan pengalaman belajar yang terasa seperti product dashboard modern: rapi, cepat, dan nyaman dipakai dari mobile sampai desktop.
+                    </p>
+                </div>
+
+                <form action="{% url 'courses:discovery' %}" method="get" class="max-w-2xl">
+                    <div class="flex flex-col gap-3 rounded-[1.5rem] border border-slate-200 bg-white p-3 shadow-sm sm:flex-row dark:border-slate-700 dark:bg-slate-900/85">
+                        <div class="relative flex-1">
+                            <input type="search" name="q" placeholder="Search courses, topics, or mentors" class="w-full border-0 bg-transparent py-3 pl-11 pr-4 text-base shadow-none focus:ring-0" />
+                        </div>
+                        <button type="submit" class="inline-flex items-center justify-center rounded-2xl bg-black px-5 py-3.5 text-sm font-bold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-900">
+                            Explore courses
+                        </button>
+                    </div>
+                </form>
+
+                <div class="flex flex-wrap gap-3">
+                    <a href="{% url 'courses:discovery' %}" class="inline-flex items-center justify-center rounded-2xl bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-slate-800 dark:bg-white dark:text-slate-950 dark:hover:bg-slate-200">
+                        Start learning
+                    </a>
+                    <a href="#highlights" class="inline-flex items-center justify-center rounded-2xl border border-slate-200 bg-white/90 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:-translate-y-0.5 hover:border-brand-200 hover:text-brand-700 dark:border-slate-700 dark:bg-slate-900/80 dark:text-slate-200 dark:hover:text-white">
+                        Why SkillForge
+                    </a>
+                </div>
+
+                <div class="grid gap-4 sm:grid-cols-3">
+                    <div class="rounded-[1.5rem] border border-white/70 bg-white/80 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
+                        <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Users</p>
+                        <p class="mt-2 text-3xl font-black text-slate-950 dark:text-white">{{ total_users }}</p>
+                    </div>
+                    <div class="rounded-[1.5rem] border border-white/70 bg-white/80 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
+                        <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Courses</p>
+                        <p class="mt-2 text-3xl font-black text-slate-950 dark:text-white">{{ total_courses }}</p>
+                    </div>
+                    <div class="rounded-[1.5rem] border border-white/70 bg-white/80 p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900/80">
+                        <p class="text-xs font-semibold uppercase tracking-[0.25em] text-slate-400">Students</p>
+                        <p class="mt-2 text-3xl font-black text-slate-950 dark:text-white">{{ total_students }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative">
+                <div class="absolute -inset-6 rounded-[2.5rem] bg-gradient-to-br from-slate-900/40 via-black/30 to-transparent blur-3xl"></div>
+                <div class="relative overflow-hidden rounded-[2.25rem] border border-white/10 bg-black p-6 text-white shadow-glow dark:border-slate-700">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold uppercase tracking-[0.25em] text-brand-200">
+                                Learning OS
+                            </p>
+                            <h2 class="mt-2 text-2xl font-black tracking-tight">
+                                Designed for momentum
+                            </h2>
+                        </div>
+
+                        <div class="grid h-14 w-14 place-items-center rounded-2xl bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 640 512"
+                                fill="currentColor"
+                                class="h-6 w-6"
+                            >
+                                <path d="M622.3 153.7L343.4 25.4c-15.4-7.1-33.4-7.1-48.8 0L17.7 153.7c-23.6 10.9-23.6 44.6 0 55.5l92.3 42.5V352c0 17.7 14.3 32 32 32h16v80c0 26.5 86 48 192 48s192-21.5 192-48v-80h16c17.7 0 32-14.3 32-32V251.7l32.3-14.8c23.6-10.9 23.6-44.6 0-55.5z"/>
+                            </svg>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 grid gap-4">
+                        <div class="rounded-2xl border border-white/10 bg-slate-900/40 backdrop-blur-xl p-4">
+                            <p class="text-sm font-semibold text-white">Interactive curriculum</p>
+                            <p class="mt-2 text-sm leading-6 text-slate-300">Belajar lewat alur yang ringkas, visual, dan tetap fokus pada outcome.</p>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-slate-900/40 backdrop-blur-xl p-4">
+                            <p class="text-sm font-semibold text-white">Modern dashboard</p>
+                            <p class="mt-2 text-sm leading-6 text-slate-300">Layout yang terasa seperti Linear dan Notion untuk navigasi yang lebih cepat.</p>
+                        </div>
+                        <div class="rounded-2xl border border-white/10 bg-slate-900/40 backdrop-blur-xl p-4">
+                            <p class="text-sm font-semibold text-white">Premium visuals</p>
+                            <p class="mt-2 text-sm leading-6 text-slate-300">Soft shadows, rounded-2xl cards, dan spacing yang memberi rasa lebih eksklusif.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="highlights" class="px-4 pb-12 sm:px-6 lg:px-8 lg:pb-16">
+    <div class="mx-auto max-w-7xl">
+        <div class="grid gap-6 md:grid-cols-3">
+            <article class="rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-glow dark:border-slate-800 dark:bg-slate-950/70">
+                <div class="grid h-14 w-14 place-items-center rounded-2xl bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="h-6 w-6">
+                        <path stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M2.036 12.322a1.012 1.012 0 0 1 0-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178Z" />
+                        <path stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    </svg>
+                </div>
+                <h3 class="mt-5 text-xl font-extrabold tracking-tight text-slate-950 dark:text-white">Focused workflow</h3>
+                <p class="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">Navigasi singkat, hierarki jelas, dan komponen yang mengarahkan user ke aksi berikutnya tanpa berisik.</p>
+            </article>
+            <article class="rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-glow dark:border-slate-800 dark:bg-slate-950/70">
+                <div class="grid h-14 w-14 place-items-center rounded-2xl bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="h-6 w-6">
+                        <path stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243-1.59-1.59" />
+                    </svg>
+                </div>
+                <h3 class="mt-5 text-xl font-extrabold tracking-tight text-slate-950 dark:text-white">Polished interactions</h3>
+                <p class="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">Hover state, blur layers, dan transisi halus membuat pengalaman terasa hidup namun tetap profesional.</p>
+            </article>
+            <article class="rounded-[2rem] border border-white/70 bg-white/80 p-6 shadow-soft transition duration-300 hover:-translate-y-1 hover:shadow-glow dark:border-slate-800 dark:bg-slate-950/70">
+                <div class="grid h-14 w-14 place-items-center rounded-2xl bg-slate-100 text-slate-900 dark:bg-slate-800 dark:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="h-6 w-6">
+                        <path stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M9 4.5v15m6-15v15m-10.875 0h15.75c.621 0 1.125-.504 1.125-1.125V5.625c0-.621-.504-1.125-1.125-1.125H4.125C3.504 4.5 3 5.004 3 5.625v12.75c0 .621.504 1.125 1.125 1.125Z" />
+                    </svg>
+                </div>
+                <h3 class="mt-5 text-xl font-extrabold tracking-tight text-slate-950 dark:text-white">Built to scale</h3>
+                <p class="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">Komponen yang rapi dan konsisten memudahkan pertumbuhan tanpa mengorbankan kejelasan visual.</p>
+            </article>
+        </div>
+    </div>
+</section>
+
+<section class="w-full bg-white py-20 text-slate-900 mb-16 dark:bg-black dark:text-white">
+    <div class="mx-auto max-w-7xl px-6">
+        <div class="text-center">
+            <p class="text-xs font-bold uppercase tracking-[0.3em] text-slate-600 dark:text-slate-300">
+                Why choose SkillForge
+            </p>
+
+            <h2 class="mt-4 max-w-3xl mx-auto text-3xl font-black tracking-tight sm:text-4xl">
+                A premium learning experience that feels like a product, not a portal.
+            </h2>
+
+            <p class="mt-4 max-w-3xl mx-auto text-sm leading-7 text-slate-600 dark:text-slate-400">
+                Didesain untuk memberi impresi produksi yang matang: konten mudah dibaca, CTA tegas, dan struktur yang cepat dipahami di semua perangkat.
+            </p>
+
+            <div class="mt-8 flex items-center justify-center">
+                <a href="{% url 'courses:discovery' %}"
+                   class="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-6 py-3.5 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+                    Browse courses
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="relative z-10 px-4 pb-16 pt-8 sm:px-6 lg:px-8 lg:pb-24">
+    <div class="mx-auto max-w-7xl">
+        <div class="flex items-end justify-between gap-4 px-1 pb-6">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-[0.3em] text-slate-500">
+                    Student comments
+                </p>
+                <h2 class="mt-2 text-3xl font-black tracking-tight text-slate-950 dark:text-white">
+                    Komentar yang bergerak otomatis
+                </h2>
+            </div>
+            <p class="hidden text-sm text-slate-500 dark:text-slate-400 md:block">
+                Loop kiri ke kanan, card bisa diubah ukurannya lewat lebar tiap item.
+            </p>
+        </div>
+
+        <div class="overflow-hidden rounded-[2.25rem] border border-slate-200 bg-white py-6 shadow-soft dark:border-slate-800 dark:bg-slate-950">
+            <div class="commenter-marquee-track flex w-max gap-6 px-6">
+
+                <!-- Group 1 -->
+                <div class="flex w-max gap-6">
+                    <article class="w-[clamp(16rem,28vw,22rem)] shrink-0 rounded-[28px] border border-slate-200 bg-slate-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex gap-1 text-slate-900 dark:text-white">
+                            ★ ★ ★ ★ ★
+                        </div>
+
+                        <p class="mt-5 text-sm leading-7 text-slate-600 dark:text-slate-300">
+                            Materinya sangat mudah dipahami dan tampilannya nyaman. Saya jadi lebih semangat belajar frontend development.
+                        </p>
+
+                        <div class="mt-6 flex items-center gap-4 border-t border-slate-200 pt-5 dark:border-slate-800">
+                            <div class="grid h-12 w-12 place-items-center rounded-full bg-slate-200 font-bold text-slate-900 dark:bg-slate-800 dark:text-white">
+                                A
+                            </div>
+
+                            <div>
+                                <h4 class="font-bold text-slate-900 dark:text-white">
+                                    Andika Pratama
+                                </h4>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">
+                                    Frontend Student
+                                </p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="w-[clamp(16rem,28vw,22rem)] shrink-0 rounded-[28px] border border-slate-200 bg-slate-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex gap-1 text-slate-900 dark:text-white">
+                            ★ ★ ★ ★ ★
+                        </div>
+
+                        <p class="mt-5 text-sm leading-7 text-slate-600 dark:text-slate-300">
+                            Penjelasannya detail dan mentor sangat membantu. Cocok untuk pemula yang ingin masuk dunia IT.
+                        </p>
+
+                        <div class="mt-6 flex items-center gap-4 border-t border-slate-200 pt-5 dark:border-slate-800">
+                            <div class="grid h-12 w-12 place-items-center rounded-full bg-slate-200 font-bold text-slate-900 dark:bg-slate-800 dark:text-white">
+                                S
+                            </div>
+
+                            <div>
+                                <h4 class="font-bold text-slate-900 dark:text-white">
+                                    Salsabila
+                                </h4>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">
+                                    UI/UX Student
+                                </p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="w-[clamp(16rem,28vw,22rem)] shrink-0 rounded-[28px] border border-slate-200 bg-slate-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex gap-1 text-slate-900 dark:text-white">
+                            ★ ★ ★ ★ ★
+                        </div>
+
+                        <p class="mt-5 text-sm leading-7 text-slate-600 dark:text-slate-300">
+                            Course-nya sangat terstruktur dari basic sampai advanced. Sangat worth it untuk upgrade skill.
+                        </p>
+
+                        <div class="mt-6 flex items-center gap-4 border-t border-slate-200 pt-5 dark:border-slate-800">
+                            <div class="grid h-12 w-12 place-items-center rounded-full bg-slate-200 font-bold text-slate-900 dark:bg-slate-800 dark:text-white">
+                                R
+                            </div>
+
+                            <div>
+                                <h4 class="font-bold text-slate-900 dark:text-white">
+                                    Rizky Maulana
+                                </h4>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">
+                                    Backend Learner
+                                </p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+                <!-- Duplicate Group -->
+                <div class="flex w-max gap-6" aria-hidden="true">
+                    <article class="w-[clamp(16rem,28vw,22rem)] shrink-0 rounded-[28px] border border-slate-200 bg-slate-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex gap-1 text-slate-900 dark:text-white">
+                            ★ ★ ★ ★ ★
+                        </div>
+
+                        <p class="mt-5 text-sm leading-7 text-slate-600 dark:text-slate-300">
+                            Materinya sangat mudah dipahami dan tampilannya nyaman. Saya jadi lebih semangat belajar frontend development.
+                        </p>
+
+                        <div class="mt-6 flex items-center gap-4 border-t border-slate-200 pt-5 dark:border-slate-800">
+                            <div class="grid h-12 w-12 place-items-center rounded-full bg-slate-200 font-bold text-slate-900 dark:bg-slate-800 dark:text-white">
+                                A
+                            </div>
+
+                            <div>
+                                <h4 class="font-bold text-slate-900 dark:text-white">
+                                    Andika Pratama
+                                </h4>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">
+                                    Frontend Student
+                                </p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="w-[clamp(16rem,28vw,22rem)] shrink-0 rounded-[28px] border border-slate-200 bg-slate-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex gap-1 text-slate-900 dark:text-white">
+                            ★ ★ ★ ★ ★
+                        </div>
+
+                        <p class="mt-5 text-sm leading-7 text-slate-600 dark:text-slate-300">
+                            Penjelasannya detail dan mentor sangat membantu. Cocok untuk pemula yang ingin masuk dunia IT.
+                        </p>
+
+                        <div class="mt-6 flex items-center gap-4 border-t border-slate-200 pt-5 dark:border-slate-800">
+                            <div class="grid h-12 w-12 place-items-center rounded-full bg-slate-200 font-bold text-slate-900 dark:bg-slate-800 dark:text-white">
+                                S
+                            </div>
+
+                            <div>
+                                <h4 class="font-bold text-slate-900 dark:text-white">
+                                    Salsabila
+                                </h4>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">
+                                    UI/UX Student
+                                </p>
+                            </div>
+                        </div>
+                    </article>
+
+                    <article class="w-[clamp(16rem,28vw,22rem)] shrink-0 rounded-[28px] border border-slate-200 bg-slate-50 p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
+                        <div class="flex gap-1 text-slate-900 dark:text-white">
+                            ★ ★ ★ ★ ★
+                        </div>
+
+                        <p class="mt-5 text-sm leading-7 text-slate-600 dark:text-slate-300">
+                            Course-nya sangat terstruktur dari basic sampai advanced. Sangat worth it untuk upgrade skill.
+                        </p>
+
+                        <div class="mt-6 flex items-center gap-4 border-t border-slate-200 pt-5 dark:border-slate-800">
+                            <div class="grid h-12 w-12 place-items-center rounded-full bg-slate-200 font-bold text-slate-900 dark:bg-slate-800 dark:text-white">
+                                R
+                            </div>
+
+                            <div>
+                                <h4 class="font-bold text-slate-900 dark:text-white">
+                                    Rizky Maulana
+                                </h4>
+                                <p class="text-sm text-slate-500 dark:text-slate-400">
+                                    Backend Learner
+                                </p>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="w-full bg-white py-20 text-slate-900 dark:bg-black dark:text-white">
+
+    <div class="mx-auto max-w-7xl px-6">
+
+        <div class="text-center">
+
+            <span class="inline-flex rounded-full border border-slate-300 bg-slate-100 px-4 py-1 text-xs font-bold uppercase tracking-[0.2em] text-slate-700 dark:border-white/10 dark:bg-white/5 dark:text-slate-300">
+                Mulai Sekarang
+            </span>
+
+            <h2 class="mt-5 text-4xl font-black tracking-tight">
+                Temukan Kursus Terbaik
+                Untuk Skill Masa Depan
+            </h2>
+
+            <p class="mt-4 text-lg leading-8 text-slate-600 dark:text-slate-400">
+                Belajar frontend, backend, UI/UX, dan berbagai skill digital modern dengan pengalaman belajar yang nyaman dan mudah dipahami.
+            </p>
+
+            <div class="mt-8 flex flex-wrap items-center justify-center gap-4">
+
+                <a href="{% url 'courses:discovery' %}"
+                   class="inline-flex items-center rounded-2xl bg-slate-900 px-7 py-4 text-base font-bold text-white shadow-lg transition hover:scale-[1.03] hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+                    Cari Kursus →
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ===================================================== -->
+<!-- #FAQAccordion SkillForge -->
+<!-- ===================================================== -->
+<section class="w-full bg-slate-50 py-16 dark:bg-slate-950">
+
+    <!-- #Container -->
+    <div class="mx-auto max-w-7xl px-6">
+        <div class="rounded-[40px] border border-slate-200 bg-white px-6 py-14 shadow-xl dark:border-slate-800 dark:bg-black">
+
+        <!-- #Header -->
+        <div class="mx-auto max-w-2xl text-center">
+
+            <span class="inline-flex rounded-full border border-slate-200 bg-slate-100 px-4 py-1 text-xs font-bold uppercase tracking-[0.2em] text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300">
+                FAQ
+            </span>
+
+            <h2 class="mt-5 text-3xl font-black tracking-tight text-slate-900 sm:text-4xl dark:text-white">
+                Pertanyaan yang Sering Ditanyakan
+            </h2>
+
+            <p class="mt-4 text-sm leading-6 text-slate-600 dark:text-slate-400">
+                Klik pertanyaan untuk melihat penjelasan lengkap.
+            </p>
+
+        </div>
+
+        <!-- ===================================================== -->
+        <!-- #FAQList -->
+        <!-- ===================================================== -->
+        <div class="mt-10 space-y-4">
+
+            <!-- #FAQ1 -->
+            <details class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-950">
+
+                <summary class="flex cursor-pointer list-none items-center justify-between text-slate-900 dark:text-white">
+
+                    <span class="text-base font-bold">
+                        Apa itu SkillForge?
+                    </span>
+
+                    <span class="text-slate-900 dark:text-white text-xl transition group-open:rotate-180">
+                        ▼
+                    </span>
+                </summary>
+
+                <p class="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-400">
+                    SkillForge adalah platform pembelajaran IT modern yang dirancang untuk membantu kamu belajar dari dasar hingga siap kerja di industri.
+                    Materi disusun secara sistematis, mulai dari HTML, CSS, JavaScript, hingga backend seperti Django dan database.
+                </p>
+
+            </details>
+
+            <!-- #FAQ2 -->
+            <details class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-950">
+
+                <summary class="flex cursor-pointer list-none items-center justify-between text-slate-900 dark:text-white">
+
+                    <span class="text-base font-bold">
+                        Apakah cocok untuk pemula?
+                    </span>
+
+                    <span class="text-slate-900 dark:text-white text-xl transition group-open:rotate-180">
+                        ▼
+                    </span>
+
+                </summary>
+
+                <p class="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-400">
+                    Sangat cocok. SkillForge dirancang khusus untuk pemula tanpa pengalaman coding.
+                    Kamu akan belajar step-by-step dari nol sampai bisa membuat project nyata seperti website dan aplikasi.
+                </p>
+
+            </details>
+
+            <!-- #FAQ3 -->
+            <details class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-950">
+
+                <summary class="flex cursor-pointer list-none items-center justify-between text-slate-900 dark:text-white">
+
+                    <span class="text-base font-bold">
+                        Apakah ada mentor?
+                    </span>
+
+                    <span class="text-slate-900 dark:text-white text-xl transition group-open:rotate-180">
+                        ▼
+                    </span>
+
+                </summary>
+
+                <p class="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-400">
+                    Ya. Kamu akan dibimbing oleh mentor aktif yang sudah berpengalaman di industri software development.
+                    Mereka akan membantu saat kamu stuck dan memberikan review pada project kamu.
+                </p>
+
+            </details>
+
+            <!-- #FAQ4 -->
+            <details class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-950">
+
+                <summary class="flex cursor-pointer list-none items-center justify-between text-slate-900 dark:text-white">
+
+                    <span class="text-base font-bold">
+                        Bisa belajar kapan saja?
+                    </span>
+
+                    <span class="text-slate-900 dark:text-white text-xl transition group-open:rotate-180">
+                        ▼
+                    </span>
+
+                </summary>
+
+                <p class="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-400">
+                    Bisa. SkillForge menyediakan akses 24/7 sehingga kamu bebas belajar kapan saja sesuai waktu luangmu,
+                    baik pagi, malam, atau weekend.
+                </p>
+
+            </details>
+
+            <!-- #FAQ6 -->
+            <details class="group rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-slate-800 dark:bg-slate-950">
+
+                <summary class="flex cursor-pointer list-none items-center justify-between text-slate-900 dark:text-white">
+
+                    <span class="text-base font-bold">
+                        Apakah pembayaran aman?
+                    </span>
+
+                    <span class="text-slate-900 dark:text-white text-xl transition group-open:rotate-180">
+                        ▼
+                    </span>
+
+                </summary>
+
+                <p class="mt-4 text-sm leading-7 text-slate-600 dark:text-slate-400">
+                    Sangat aman. Semua transaksi diproses melalui sistem pembayaran terpercaya dan terenkripsi untuk keamanan data kamu.
+                </p>
+
+            </details>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ===================================================== -->
+<!-- #Footer SkillForge FULL WIDTH -->
+<!-- ===================================================== -->
+<footer class="mt-auto w-full bg-slate-950 text-white">
+    <div class="mx-auto max-w-7xl px-6 py-16 lg:py-20">
+        <div class="grid gap-10 lg:grid-cols-[1.4fr_1fr_1fr_1.2fr] lg:items-start">
+            <div class="space-y-5">
+                <a href="{% url 'home' %}" class="inline-flex items-center gap-3">
+                    <span class="grid h-10 w-10 place-items-center rounded-2xl border border-white/20 bg-white/10 text-base font-black text-white">S</span>
+                    <span>
+                        <span class="block text-lg font-extrabold">SkillForge</span>
+                        <span class="block text-xs text-white/70">Belajar, buat portfolio, dan dapatkan karir developer.</span>
+                    </span>
+                </a>
+
+                <p class="max-w-sm text-sm leading-6 text-white/70">SkillForge membantu kamu belajar teknologi modern, membuat project nyata, dan mendapatkan sertifikat yang bisa digunakan untuk karir.</p>
+
+                <div class="flex items-center gap-3 text-sm text-white/70">
+                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">f</span>
+                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">in</span>
+                    <span class="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">ig</span>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="text-sm font-bold uppercase tracking-[0.18em] text-white/80">Quick links</h4>
+                <ul class="mt-5 space-y-3 text-sm text-white/70">
+                    <li><a href="{% url 'courses:discovery' %}" class="hover:text-white">Explore Courses</a></li>
+                    <li><a href="{% url 'courses:my_courses' %}" class="hover:text-white">My Courses</a></li>
+                    <li><a href="{% url 'courses:history' %}" class="hover:text-white">Learning History</a></li>
+                    <li><a href="{% url 'courses:cart' %}" class="hover:text-white">Cart</a></li>
+                </ul>
+            </div>
+
+            <div>
+                <h4 class="text-sm font-bold uppercase tracking-[0.18em] text-white/80">Support</h4>
+                <ul class="mt-5 space-y-3 text-sm text-white/70">
+                    <li><a href="{% url 'courses:withdraw_request' %}" class="hover:text-white">Withdraw Request</a></li>
+                    <li><a href="{% url 'accounts:profile' %}" class="hover:text-white">Account Profile</a></li>
+                    <li><a href="{% url 'dashboard:index' %}" class="hover:text-white">Instructor Dashboard</a></li>
+                    <li><a href="mailto:hello@skillforge.com" class="hover:text-white">Email Support</a></li>
+                </ul>
+            </div>
+
+            <div class="lg:pl-6">
+                <h4 class="text-sm font-bold uppercase tracking-[0.18em] text-white/80">Stay updated</h4>
+                <p class="mt-3 text-sm text-white/70">Dapatkan update course baru dan event mingguan langsung lewat email.</p>
+
+                <form class="mt-5 flex flex-col gap-3" action="#" method="post" onsubmit="return false;">
+                    <label for="footer-email" class="sr-only">Email</label>
+                    <input id="footer-email" type="email" placeholder="Email kamu" class="w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-slate-400 focus:border-white/30 focus:outline-none" />
+                    <button class="inline-flex w-full items-center justify-center rounded-2xl bg-white px-4 py-3 text-sm font-bold text-slate-950 transition hover:bg-white/90">Subscribe</button>
+                </form>
+
+                <div class="mt-4 space-y-3 text-sm text-white/60">
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-10 border-t border-white/10 pt-6">
+            <div class="flex flex-col items-center justify-between gap-4 md:flex-row">
+                <p class="text-sm text-white/60">© 2026 SkillForge. All rights reserved.</p>
+                <div class="flex flex-wrap items-center gap-4 text-sm text-white/60">
+                    <a href="{% url 'home' %}" class="hover:text-white">Home</a>
+                    <a href="{% url 'courses:discovery' %}" class="hover:text-white">Explore</a>
+                    <a href="{% url 'courses:my_courses' %}" class="hover:text-white">My Courses</a>
+                    <a href="{% url 'courses:cart' %}" class="hover:text-white">Cart</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+{% endblock %}

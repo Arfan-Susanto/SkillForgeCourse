@@ -1,0 +1,303 @@
+{% extends "dashboard/layout.html" %}
+
+{% block title %}SkillForge Admin | Overview{% endblock %}
+{% block breadcrumb %}Overview{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+<section class="overflow-hidden rounded-[2.5rem] border border-slate-800 bg-slate-950 p-6 text-white shadow-glow">
+    <div class="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+        <div>
+            <div class="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-white/70">
+                {% if user.is_staff %}Admin overview{% else %}Instructor overview{% endif %}
+            </div>
+
+            <h1 class="mt-4 text-4xl font-black tracking-tight sm:text-5xl">
+                Operate SkillForge like a premium product.
+            </h1>
+
+            <p class="mt-4 max-w-2xl text-sm leading-7 text-white/70 sm:text-base">
+                Ringkasan metrik, course terbaru, dan enrollment terbaru ditampilkan dengan layout yang lebih cepat dibaca dan lebih meyakinkan secara visual.
+            </p>
+        </div>
+
+        <div class="grid gap-3 sm:grid-cols-2">
+            <div class="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                <p class="text-xs font-semibold uppercase tracking-[0.25em] text-white/60">Total users</p>
+                <p class="mt-3 text-3xl font-black">{{ stats.total_users }}</p>
+            </div>
+
+            <div class="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                <p class="text-xs font-semibold uppercase tracking-[0.25em] text-white/60">Total courses</p>
+                <p class="mt-3 text-3xl font-black">{{ stats.total_courses }}</p>
+            </div>
+
+            <div class="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                <p class="text-xs font-semibold uppercase tracking-[0.25em] text-white/60">Total students</p>
+                <p class="mt-3 text-3xl font-black">{{ stats.total_students }}</p>
+            </div>
+
+            <div class="rounded-[1.5rem] border border-white/10 bg-white/5 p-4">
+                <p class="text-xs font-semibold uppercase tracking-[0.25em] text-white/60">Enrollments</p>
+                <p class="mt-3 text-3xl font-black">{{ stats.total_enrollments }}</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% if has_chart_data %}
+<!-- Revenue Chart Section -->
+<section class="rounded-[2.5rem] border border-white/70 bg-white/85 p-6 shadow-soft dark:border-slate-800/70 dark:bg-slate-950/75">
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+            <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">Ikhtisar Pendapatan</p>
+            <h2 class="mt-2 text-2xl font-black tracking-tight text-slate-950 dark:text-white">Total Pendapatan Per Bulan ({{ current_year }})</h2>
+        </div>
+        <div class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
+            <span class="h-2.5 w-2.5 rounded-full bg-indigo-500"></span>
+            Paid Invoices
+        </div>
+    </div>
+    <div class="relative h-96 w-full">
+        <canvas id="revenueChart"></canvas>
+    </div>
+</section>
+{% endif %}
+
+    <div class="grid gap-6 xl:grid-cols-2">
+        <section class="rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-soft dark:border-slate-800/70 dark:bg-slate-950/75">
+            <div class="flex items-center justify-between gap-4">
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">Recent courses</p>
+                    <h2 class="mt-2 text-2xl font-black tracking-tight text-slate-950 dark:text-white">Latest additions</h2>
+                </div>
+                <a href="{% url 'dashboard:manage_courses' %}" class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:text-slate-900 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200">Manage</a>
+            </div>
+
+            <div class="mt-6 space-y-4">
+                {% for course in recent_courses_page_obj %}
+                    <div class="flex items-center justify-between gap-4 rounded-[1.5rem] border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/70">
+                        <div>
+                            <h3 class="font-semibold text-slate-950 dark:text-white">{{ course.title }}</h3>
+                            <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ course.instructor }}</p>
+                        </div>
+                        <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold text-slate-700 dark:bg-slate-800/70 dark:text-slate-300">{{ course.enrollment_count|default:0 }} enrollments</span>
+                    </div>
+                {% empty %}
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Belum ada course.</p>
+                {% endfor %}
+            </div>
+
+            {% if recent_courses_page_obj.has_other_pages %}
+                <div class="mt-6 flex items-center justify-between gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
+                    <p class="text-sm text-slate-500 dark:text-slate-400">
+                        {{ recent_courses_page_obj.start_index }}-{{ recent_courses_page_obj.end_index }} dari {{ recent_courses_page_obj.paginator.count }} course
+                    </p>
+                    <div class="flex items-center gap-2">
+                        {% if recent_courses_page_obj.has_previous %}
+                            <a href="?courses_page={{ recent_courses_page_obj.previous_page_number }}{% if recent_enrollments_page_obj.number %}&enrollments_page={{ recent_enrollments_page_obj.number }}{% endif %}" class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">Previous</a>
+                        {% else %}
+                            <span class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50/50 px-4 text-xs font-semibold text-slate-400 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-600">Previous</span>
+                        {% endif %}
+                        <span class="inline-flex h-9 items-center justify-center rounded-xl bg-slate-950 px-4 text-xs font-bold text-white dark:bg-white dark:text-slate-950">{{ recent_courses_page_obj.number }} / {{ recent_courses_page_obj.paginator.num_pages }}</span>
+                        {% if recent_courses_page_obj.has_next %}
+                            <a href="?courses_page={{ recent_courses_page_obj.next_page_number }}{% if recent_enrollments_page_obj.number %}&enrollments_page={{ recent_enrollments_page_obj.number }}{% endif %}" class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">Next</a>
+                        {% else %}
+                            <span class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50/50 px-4 text-xs font-semibold text-slate-400 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-600">Next</span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </section>
+
+        <section class="rounded-[2rem] border border-white/70 bg-white/85 p-6 shadow-soft dark:border-slate-800/70 dark:bg-slate-950/75">
+            <div>
+                <p class="text-xs font-bold uppercase tracking-[0.25em] text-slate-400">Recent enrollments</p>
+                <h2 class="mt-2 text-2xl font-black tracking-tight text-slate-950 dark:text-white">Activity stream</h2>
+            </div>
+
+            <div class="mt-6 space-y-4">
+                {% for enrollment in recent_enrollments_page_obj %}
+                    <div class="rounded-[1.5rem] border border-slate-100 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900/70">
+                        <div class="flex items-center justify-between gap-4">
+                            <div>
+                                <h3 class="font-semibold text-slate-950 dark:text-white">{{ enrollment.user }}</h3>
+                                <p class="mt-1 text-sm text-slate-500 dark:text-slate-400">{{ enrollment.course }}</p>
+                            </div>
+                            <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-bold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-200">{{ enrollment.get_granted_via_display }}</span>
+                        </div>
+                    </div>
+                {% empty %}
+                    <p class="text-sm text-slate-500 dark:text-slate-400">Belum ada enrollment.</p>
+                {% endfor %}
+            </div>
+
+            {% if recent_enrollments_page_obj.has_other_pages %}
+                <div class="mt-6 flex items-center justify-between gap-3 border-t border-slate-100 pt-4 dark:border-slate-800">
+                    <p class="text-sm text-slate-500 dark:text-slate-400">
+                        {{ recent_enrollments_page_obj.start_index }}-{{ recent_enrollments_page_obj.end_index }} dari {{ recent_enrollments_page_obj.paginator.count }} enrollment
+                    </p>
+                    <div class="flex items-center gap-2">
+                        {% if recent_enrollments_page_obj.has_previous %}
+                            <a href="?enrollments_page={{ recent_enrollments_page_obj.previous_page_number }}{% if recent_courses_page_obj.number %}&courses_page={{ recent_courses_page_obj.number }}{% endif %}" class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">Previous</a>
+                        {% else %}
+                            <span class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50/50 px-4 text-xs font-semibold text-slate-400 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-600">Previous</span>
+                        {% endif %}
+                        <span class="inline-flex h-9 items-center justify-center rounded-xl bg-slate-950 px-4 text-xs font-bold text-white dark:bg-white dark:text-slate-950">{{ recent_enrollments_page_obj.number }} / {{ recent_enrollments_page_obj.paginator.num_pages }}</span>
+                        {% if recent_enrollments_page_obj.has_next %}
+                            <a href="?enrollments_page={{ recent_enrollments_page_obj.next_page_number }}{% if recent_courses_page_obj.number %}&courses_page={{ recent_courses_page_obj.number }}{% endif %}" class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-white px-4 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800">Next</a>
+                        {% else %}
+                            <span class="inline-flex h-9 items-center justify-center rounded-xl border border-slate-200 bg-slate-50/50 px-4 text-xs font-semibold text-slate-400 dark:border-slate-700 dark:bg-slate-900/40 dark:text-slate-600">Next</span>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- Load Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const canvas = document.getElementById('revenueChart');
+        if (!canvas) {
+            return;
+        }
+
+        const ctx = canvas.getContext('2d');
+        const labels = {{ chart_labels|safe }};
+        const rawData = {{ chart_data|safe }};
+
+        // Format currency helper (Indonesian Rupiah)
+        const formatIDR = (value) => {
+            return new Intl.NumberFormat('id-ID', {
+                style: 'currency',
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(value);
+        };
+
+        // Determine design modes based on Tailwind/Alpine state or class List
+        const isDark = () => document.documentElement.classList.contains('dark');
+
+        const getChartColors = () => {
+            const dark = isDark();
+            return {
+                gridColor: dark ? 'rgba(148, 163, 184, 0.08)' : 'rgba(15, 23, 42, 0.05)',
+                tickColor: dark ? '#94a3b8' : '#64748b',
+                lineColor: '#6366f1',
+                gradientStart: 'rgba(99, 102, 241, 0.25)',
+                gradientEnd: 'rgba(99, 102, 241, 0)'
+            };
+        };
+
+        let colors = getChartColors();
+
+        // Create gradient fill
+        let gradient = ctx.createLinearGradient(0, 0, 0, 300);
+        gradient.addColorStop(0, colors.gradientStart);
+        gradient.addColorStop(1, colors.gradientEnd);
+
+        const config = {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Pendapatan',
+                    data: rawData,
+                    borderColor: colors.lineColor,
+                    borderWidth: 3,
+                    pointBackgroundColor: colors.lineColor,
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7,
+                    pointHoverBackgroundColor: colors.lineColor,
+                    pointHoverBorderColor: '#ffffff',
+                    pointHoverBorderWidth: 2,
+                    fill: true,
+                    backgroundColor: gradient,
+                    tension: 0.35
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        backgroundColor: '#0f172a',
+                        titleColor: '#f1f5f9',
+                        bodyColor: '#f1f5f9',
+                        padding: 12,
+                        cornerRadius: 12,
+                        displayColors: false,
+                        callbacks: {
+                            label: function (context) {
+                                return 'Total: ' + formatIDR(context.parsed.y);
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: {
+                            display: false
+                        },
+                        ticks: {
+                            color: colors.tickColor,
+                            font: {
+                                family: 'Plus Jakarta Sans',
+                                weight: 600
+                            }
+                        }
+                    },
+                    y: {
+                        grid: {
+                            color: colors.gridColor
+                        },
+                        ticks: {
+                            color: colors.tickColor,
+                            font: {
+                                family: 'Plus Jakarta Sans'
+                            },
+                            callback: function (value) {
+                                return formatIDR(value);
+                            }
+                        }
+                    }
+                }
+            }
+        };
+
+        const revenueChart = new Chart(ctx, config);
+
+        // React to theme changes dynamically
+        const observer = new MutationObserver(() => {
+            const newColors = getChartColors();
+            
+            // Re-create gradient
+            const newGradient = ctx.createLinearGradient(0, 0, 0, 300);
+            newGradient.addColorStop(0, newColors.gradientStart);
+            newGradient.addColorStop(1, newColors.gradientEnd);
+
+            revenueChart.data.datasets[0].backgroundColor = newGradient;
+            revenueChart.options.scales.x.ticks.color = newColors.tickColor;
+            revenueChart.options.scales.y.ticks.color = newColors.tickColor;
+            revenueChart.options.scales.y.grid.color = newColors.gridColor;
+            revenueChart.update();
+        });
+
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ['class']
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% load socialaccount %}
+
+{% block title %}SkillForge | Register{% endblock %}
+
+{% block content %}
+<section class="px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+    <div class="mx-auto grid max-w-6xl overflow-hidden rounded-[2.5rem] border border-white/70 bg-white/85 shadow-soft backdrop-blur-xl lg:grid-cols-2 dark:border-slate-800/70 dark:bg-slate-950/70">
+
+        <aside class="hidden bg-gradient-to-br from-slate-900 via-slate-950 to-slate-800 p-10 text-white lg:flex lg:flex-col lg:justify-between">
+            <div>
+                <span class="inline-flex rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
+                    Create account
+                </span>
+
+                <h1 class="mt-5 text-4xl font-black tracking-tight">
+                    Launch a cleaner learning storefront in minutes.
+                </h1>
+
+                <p class="mt-4 max-w-md text-sm leading-7 text-slate-300">
+                    Buat akun untuk mulai eksplorasi course, checkout, dan kelola learning journey dengan flow yang modern.
+                </p>
+            </div>
+
+            <div class="rounded-[1.75rem] border border-white/10 bg-white/10 p-5 backdrop-blur">
+                <p class="text-xs uppercase tracking-[0.25em] text-slate-300">
+                    Best for
+                </p>
+
+                <div class="mt-4 flex flex-wrap gap-2 text-sm text-white/90">
+                    <span class="rounded-full bg-white/10 px-3 py-1">Instructor dashboards</span>
+                    <span class="rounded-full bg-white/10 px-3 py-1">Student access</span>
+                    <span class="rounded-full bg-white/10 px-3 py-1">Redeem codes</span>
+                </div>
+            </div>
+        </aside>
+
+        <section class="p-6 sm:p-8 lg:p-10">
+            <div class="mb-8">
+                <span class="inline-flex rounded-full bg-slate-100 px-4 py-2 text-xs font-bold uppercase tracking-[0.25em] text-slate-700 dark:bg-slate-800/70 dark:text-slate-300">
+                    Create account
+                </span>
+
+                <h2 class="mt-4 text-3xl font-black tracking-tight text-slate-950 dark:text-white">
+                    Start your learning journey
+                </h2>
+
+                <p class="mt-3 text-sm leading-7 text-slate-500 dark:text-slate-400">
+                    Daftar akun baru. Kamu akan mulai sebagai student, lalu bisa apply instructor dari profile setelah login.
+                </p>
+            </div>
+
+            <form method="post" class="space-y-5">
+                {% csrf_token %}
+                {{ form.non_field_errors }}
+
+                {% for field in form %}
+                    <div>
+                        <label class="mb-2 block text-sm font-semibold text-slate-700 dark:text-slate-200">
+                            {{ field.label }}
+                        </label>
+
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <p class="mt-2 text-xs leading-6 text-slate-400">
+                                {{ field.help_text|safe }}
+                            </p>
+                        {% endif %}
+
+                        {% if field.errors %}
+                            <p class="mt-2 text-xs font-medium text-rose-600 dark:text-rose-300">
+                                {{ field.errors|striptags }}
+                            </p>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+
+                <button class="inline-flex w-full items-center justify-center rounded-2xl bg-slate-900 px-4 py-3.5 text-sm font-bold text-white transition hover:-translate-y-0.5 hover:bg-slate-800 dark:bg-white dark:text-slate-900 dark:hover:bg-slate-100">
+                    Register
+                </button>
+            </form>
+
+            <div class="my-7 flex items-center gap-3">
+                <span class="h-px flex-1 bg-slate-200 dark:bg-slate-800"></span>
+                <span class="text-xs font-semibold uppercase tracking-[0.14em] text-slate-400">
+                    Or sign up with
+                </span>
+                <span class="h-px flex-1 bg-slate-200 dark:bg-slate-800"></span>
+            </div>
+
+            {% if google_oauth_ready %}
+                <form method="post" action="{% provider_login_url 'google' process='login' %}">
+                    {% csrf_token %}
+
+                    <button class="inline-flex w-full items-center justify-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800">
+                        <i class="fa-brands fa-google"></i>
+                        Continue with Google
+                    </button>
+                </form>
+            {% else %}
+                <div class="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm leading-6 text-amber-800 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-200">
+                    Google login belum siap. Isi GOOGLE_OAUTH_CLIENT_ID (format: *.apps.googleusercontent.com) dan GOOGLE_OAUTH_CLIENT_SECRET valid di .env.
+                </div>
+            {% endif %}
+        </section>
+
+    </div>
+</section>
+{% endblock %}
